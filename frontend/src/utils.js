@@ -22,3 +22,8 @@ export async function loginUser(password, email) {
   localStorage.setItem('token', response.data.access_token);
   window.location.href = '/';
 }
+
+export function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "/login";
+}
