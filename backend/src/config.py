@@ -1,9 +1,25 @@
-from typing import Literal
-from pydantic import SecretStr
+from pydantic import BaseModel, EmailStr, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+DEFAULT_SMTP_HOST = "smtp.gmail.com"
 
-class DatabaseConfig(BaseSettings):
+
+class BaseConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file="../../.env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+    
+    
+class SMTPConfig(BaseConfig):
+    SMTP_PORT: int
+    SMTP_HOST: str = DEFAULT_SMTP_HOST
+    SMTP_PASSWORD: SecretStr
+    SMTP_EMAIL: EmailStr
+
+
+class DatabaseConfig(BaseConfig):
     DB_PORT: int
     DB_HOST: str
     DB_NAME: str
@@ -19,21 +35,15 @@ class DatabaseConfig(BaseSettings):
         )
 
 
-class AuthConfig(BaseSettings):
+class AuthConfig(BaseConfig):
     JWT_SECRET_KEY: SecretStr
     JWT_ALGORITHM: str
 
 
-class Settings(
-    AuthConfig,
-    DatabaseConfig,
-):
-    model_config = SettingsConfigDict(
-        env_file="../.env",
-        env_ignore_empty=True,
-        extra="ignore",
-    )
-    MODE: Literal["DEV", "TEST"]
+class Settings(BaseSettings):    
+    smtp: SMTPConfig = Field(default_factory=SMTPConfig)
+    database: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    auth: AuthConfig = Field(default_factory=AuthConfig)
 
 
 settings = Settings()
