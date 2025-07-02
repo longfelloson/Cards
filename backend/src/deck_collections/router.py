@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 
-from auth.dependencies import CurrentUserDependency
+from auth.dependencies import CurrentUserDependency, get_current_user
 from deck_collections.service import service
 from dependencies import UOWDependency
 from deck_collections.schemas import (
@@ -15,12 +15,10 @@ from deck_collections.schemas import (
 router = APIRouter()
 
 
-@router.post(
-    "",
-    response_model=CollectionView,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_collection(data: CollectionCreate, uow: UOWDependency):
+@router.post("", response_model=CollectionView, status_code=status.HTTP_201_CREATED)
+async def create_collection(
+    data: CollectionCreate, uow: UOWDependency, user: CurrentUserDependency,
+):
     """Create a collection with provided data"""
     collection = await service.create(data=data, uow=uow)
     return collection
@@ -30,6 +28,7 @@ async def create_collection(data: CollectionCreate, uow: UOWDependency):
     "/{collection_id}",
     response_model=CollectionView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_collection(collection_id: UUID4, uow: UOWDependency):
     """Get a collection by its id"""
@@ -41,6 +40,7 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     "",
     response_model=list[CollectionView],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_collections(
     uow: UOWDependency,
@@ -56,6 +56,7 @@ async def get_collections(
     "/{collection_id}",
     response_model=CollectionView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def update_collection(
     collection_id: UUID4, data: CollectionUpdate, uow: UOWDependency
@@ -65,7 +66,12 @@ async def update_collection(
     return collection
 
 
-@router.delete("/{collection_id}", response_model=None, status_code=status.HTTP_200_OK)
+@router.delete(
+    "/{collection_id}",
+    response_model=None,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
+)
 async def delete_collection(collection_id: UUID4, uow: UOWDependency):
     """Delete a collection by its id"""
     await service.delete(collection_id=collection_id, uow=uow)

@@ -44,6 +44,7 @@ async def get_cards(
     path="/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_card(card_id: UUID4, uow: UOWDependency):
     """Get a card by its ID"""
@@ -63,7 +64,12 @@ async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     return card
 
 
-@router.delete(path="/{card_id}", response_model=None, status_code=status.HTTP_200_OK)
+@router.delete(
+    path="/{card_id}",
+    response_model=None,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
+)
 async def delete_card(card_id: UUID4, uow: UOWDependency):
     """Delete a card by its id"""
     await service.delete(card_id=card_id, uow=uow)

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 
-from auth.dependencies import CurrentUserDependency
+from auth.dependencies import CurrentUserDependency, get_current_user
 from dependencies import UOWDependency
 from decks.service import service
 from decks.schemas import DeckCreate, DeckUpdate, DeckView, DecksFilter
@@ -31,6 +31,7 @@ async def create_deck(
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_deck(deck_id: UUID4, uow: UOWDependency):
     """Get a deck by provided ID"""
@@ -53,6 +54,7 @@ async def get_decks(
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def update_deck(deck_id: UUID4, data: DeckUpdate, uow: UOWDependency):
     """Update a deck with provided ID"""
@@ -63,6 +65,7 @@ async def update_deck(deck_id: UUID4, data: DeckUpdate, uow: UOWDependency):
 @router.delete(
     "/{deck_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(get_current_user)],
 )
 async def delete_deck(deck_id: UUID4, uow: UOWDependency):
     """Delete a deck by its ID"""
