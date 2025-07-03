@@ -9,7 +9,7 @@ Base = declarative_base()
 
 metadata = MetaData()
 
-engine = create_async_engine(settings.db_url, poolclass=NullPool)
+engine = create_async_engine(settings.database.db_url, poolclass=NullPool)
 async_session_maker = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )

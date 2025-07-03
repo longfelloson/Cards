@@ -15,7 +15,7 @@ async def get_current_user(
 ):
     """Get a current user from JWT by a request"""
     token_payload = decode_token(token)
-    user_filter = UserFilter(email=token_payload['sub'])
+    user_filter = UserFilter(email=token_payload["sub"])
     user = await users_service.get_by(filter=user_filter, uow=uow)
     return user
 

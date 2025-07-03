@@ -13,8 +13,11 @@ api_router = APIRouter(prefix="/api")
 api_router.include_router(cards_router, prefix="/cards", tags=["Cards"])
 
 api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
+
 api_router.include_router(decks_router, prefix="/decks", tags=["Decks"])
+
 api_router.include_router(users_router, prefix="/users", tags=["Users"])
+
 api_router.include_router(
     collections_router,
     prefix="/collections",

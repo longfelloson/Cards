@@ -17,7 +17,9 @@ router = APIRouter()
 
 @router.post("", response_model=CollectionView, status_code=status.HTTP_201_CREATED)
 async def create_collection(
-    data: CollectionCreate, uow: UOWDependency, user: CurrentUserDependency,
+    data: CollectionCreate,
+    uow: UOWDependency,
+    user: CurrentUserDependency,
 ):
     """Create a collection with provided data"""
     collection = await service.create(data=data, uow=uow)
