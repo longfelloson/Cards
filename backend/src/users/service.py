@@ -3,8 +3,9 @@ from typing import Optional
 from pydantic import UUID4
 
 from auth.password import get_hashed_password
+from auth.verification.service import verification_service
 from service import AbstractService
-from users.exceptions import UserAlreadyExists, UserNotFound
+from users.exceptions import UserAlreadyExistsException, UserNotFoundException
 from unit_of_work import UnitOfWork
 from users.models import User
 from users.schemas import UserCreate, UserFilter, UserUpdate, UsersFilter
@@ -18,7 +19,7 @@ class UsersService(AbstractService):
             user_filter = UserFilter(email=data.email)
             user = await self.get_by(filter=user_filter, uow=uow)
             if user:
-                raise UserAlreadyExists()
+                raise UserAlreadyExistsException()
             user = await uow.users.create(data=data)
             return user
 
@@ -32,7 +33,7 @@ class UsersService(AbstractService):
         async with uow:
             user = await uow.users.get(id=user_id)
             if not user:
-                raise UserNotFound()
+                raise UserNotFoundException()
             return user
 
     async def get_by(self, *, filter: UserFilter, uow: UnitOfWork) -> Optional[User]:
@@ -49,12 +50,36 @@ class UsersService(AbstractService):
             users = await uow.users.get_all(filter=filter)
             return users
 
-    async def update(self, user_id: UUID4, data: UserUpdate, uow: UnitOfWork) -> User:
-        """Update a user with provided data by its id"""
+    async def update(
+        self, *, user_id: UUID4, data: UserUpdate, uow: UnitOfWork
+    ) -> Optional[User]:
+        """Updates user if data.verify_email wasn't provided. if it was provided -
+        send verification email. If email was provided and verify_email wasn't -
+        confirms the email and updates the user
+
+        Returns:
+            User: updated user if fields to update were provided otherwise the 
+            same user
+        """
         async with uow:
             user = await self.get(user_id=user_id, uow=uow)
+            if data.verify_email:
+                await verification_service.send_verification_email(
+                    new_email=data.email, user=user, uow=uow
+                )
+                return user
+            elif data.verification_token:
+                await verification_service.confirm_email(
+                    token=data.verification_token, uow=uow
+                )
+                user.is_verified = True
+                
+            if not data.are_new_column_values_provided(user):
+                return user
+
             update_data = data.model_dump(exclude_none=True)
             updated_user = await uow.users.update(obj=user, data=update_data)
+
             return updated_user
 
     async def delete(self, *, user_id: UUID4, uow: UnitOfWork) -> None:

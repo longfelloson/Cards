@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, SecretStr
+from pydantic import EmailStr, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_SMTP_HOST = "smtp.gmail.com"
@@ -10,8 +10,8 @@ class BaseConfig(BaseSettings):
         env_ignore_empty=True,
         extra="ignore",
     )
-    
-    
+
+
 class SMTPConfig(BaseConfig):
     SMTP_PORT: int
     SMTP_HOST: str = DEFAULT_SMTP_HOST
@@ -40,10 +40,18 @@ class AuthConfig(BaseConfig):
     JWT_ALGORITHM: str
 
 
-class Settings(BaseSettings):    
+class Settings(BaseConfig):
     smtp: SMTPConfig = Field(default_factory=SMTPConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     auth: AuthConfig = Field(default_factory=AuthConfig)
+
+    DOMAIN: str
+    VERIFICATION_PATH: str
+
+    @property
+    def verification_url(self) -> str:
+        # 127.0.0.1 + /verification
+        return self.DOMAIN + self.VERIFICATION_PATH
 
 
 settings = Settings()

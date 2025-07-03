@@ -3,7 +3,6 @@ from typing import Optional
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
-from auth.schemas import AccessToken
 from auth.exceptions import ExpiredTokenException, InvalidTokenException
 from config import settings
 
@@ -11,9 +10,9 @@ from config import settings
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 
-def create_access_token(
-    data: dict, expires_delta: Optional[timedelta] = None
-) -> AccessToken:
+def create_token(
+    data: dict, expires_delta: Optional[timedelta] = None, access: bool = True
+) -> str:
     to_encode = data.copy()
 
     if expires_delta:
@@ -24,18 +23,18 @@ def create_access_token(
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
         to_encode,
-        settings.JWT_SECRET_KEY.get_secret_value(),
-        algorithm=settings.JWT_ALGORITHM,
+        settings.auth.JWT_SECRET_KEY.get_secret_value(),
+        algorithm=settings.auth.JWT_ALGORITHM,
     )
-    return AccessToken(access_token=encoded_jwt)
+    return encoded_jwt
 
 
 def decode_token(token: str) -> dict:
     try:
         payload = jwt.decode(
             token,
-            settings.JWT_SECRET_KEY.get_secret_value(),
-            algorithms=[settings.JWT_ALGORITHM],
+            settings.auth.JWT_SECRET_KEY.get_secret_value(),
+            algorithms=[settings.auth.JWT_ALGORITHM],
         )
         return payload
     except jwt.ExpiredSignatureError:

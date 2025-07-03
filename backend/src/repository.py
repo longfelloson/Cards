@@ -57,7 +57,8 @@ class SQLAlchemyRepository(AbstractRepository):
 
     async def update(self, *, obj, data):
         for key, value in data.items():
-            setattr(obj, key, value)
+            if hasattr(self.model, key):
+                setattr(obj, key, value)
 
         self.session.add(obj)
 

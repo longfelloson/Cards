@@ -1,11 +1,12 @@
 from fastapi import HTTPException, status
 
-MISSING_UPDATE_DATA_TEMPLATE = "Missing required data to update the {}"
+
 ALREADY_EXISTS_TEMPLATE = "The {} already exists"
 NOT_FOUND_TEMPLATE = "The {} was not found"
+NO_FIELDS_PROVIDED_TEMPLATE = "No fields were provided to update the {}"
 
 
-class AlreadyExists(HTTPException):
+class AlreadyExistsException(HTTPException):
     def __init__(self, object_name: str):
         super().__init__(
             detail=ALREADY_EXISTS_TEMPLATE.format(object_name),
@@ -13,7 +14,7 @@ class AlreadyExists(HTTPException):
         )
 
 
-class NotFound(HTTPException):
+class NotFoundException(HTTPException):
     def __init__(self, object_name: str):
         super().__init__(
             detail=NOT_FOUND_TEMPLATE.format(object_name),
@@ -21,9 +22,9 @@ class NotFound(HTTPException):
         )
 
 
-class MissingUpdateData(HTTPException):
+class NoFieldsProvidedException(HTTPException):
     def __init__(self, object_name: str):
         super().__init__(
-            detail=MISSING_UPDATE_DATA_TEMPLATE.format(object_name),
+            detail=NO_FIELDS_PROVIDED_TEMPLATE.format(object_name),
             status_code=status.HTTP_400_BAD_REQUEST,
         )

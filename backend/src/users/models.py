@@ -1,6 +1,6 @@
 from datetime import datetime
 import uuid
-from sqlalchemy import UUID, Column, DateTime, String
+from sqlalchemy import UUID, Boolean, Column, DateTime, String
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -28,6 +28,7 @@ class User(Base):
         default=datetime.now,
         nullable=False,
     )
+    is_verified = Column(Boolean, default=False)
 
     cards = relationship("Card", back_populates="user")
     decks = relationship("Deck", back_populates="user")

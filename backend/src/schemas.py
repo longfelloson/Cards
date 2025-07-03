@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import ClassVar, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from exceptions import MissingUpdateData
+from exceptions import NoFieldsProvidedException
 
 
 class BaseFilter(BaseModel):
@@ -31,10 +31,48 @@ class BaseFilter(BaseModel):
 
 
 class BaseUpdate(BaseModel):
-    __object_name: str = "object"
+    object_name: ClassVar[str]
+    model: ClassVar[type]
 
     @model_validator(mode="after")
-    def check_at_least_one_field_provided(self):
-        if not any(value is not None for value in self.__dict__.values()):
-            raise MissingUpdateData(object_name=self.__object_name)
+    def check_fields(self):
+        values = self.model_dump(exclude_none=True)
+        cls = self.__class__
+
+        if not hasattr(cls, "object_name") or not hasattr(cls, "model"):
+            raise RuntimeError("Subclasses must define 'object_name' and 'model'")
+
+        if not values:
+            raise NoFieldsProvidedException(cls.object_name)
+
+        column_values = self.get_column_values(cls=cls)
+        if not column_values.values():
+            raise NoFieldsProvidedException(cls.object_name)
+
         return self
+
+    def are_new_column_values_provided(self, db_instance) -> bool:
+        """Compare values from the update request with the current values in DB.
+
+        Returns:
+            bool: True if at least one field is changing.
+        """
+        cls = self.__class__
+        provided_column_values = self.get_column_values(cls=cls, exclude_none=True)
+        for column, provided_value in provided_column_values.items():
+            current_value = getattr(db_instance, column, None)
+            if current_value != provided_value:
+                return True
+
+        return False
+
+    def get_column_values(self, cls, exclude_none: bool = False) -> dict:
+        try:
+            column_names = [col.name for col in cls.model.__table__.columns]
+        except AttributeError:
+            raise RuntimeError(
+                f"Model {cls.model.__name__} is not a valid SQLAlchemy model"
+            )
+
+        column_values = self.model_dump(include=column_names, exclude_none=exclude_none)
+        return column_values

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from auth.verification.repository import VerificationRepository
 from deck_collections.repository import CollectionDecksRepository, CollectionsRepository
 from decks.repository import DecksRepository
 from users.repository import UsersRepository
@@ -36,6 +37,7 @@ class UnitOfWork:
         self.decks = DecksRepository(self.session)
         self.collections = CollectionsRepository(self.session)
         self.collection_decks = CollectionDecksRepository(self.session)
+        self.verification = VerificationRepository(self.session)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
