@@ -1,6 +1,6 @@
 const StudyDeckFinished = ({ studiedCardsAmount, onReset }) => {
     return (
-        <div className="flex flex-col gap-4 bg-gray-300 p-10 place-items-center">
+        <div className="flex flex-col gap-4 bg-gray-200 p-10 place-items-center">
             <h1 className="lg:text-2xl">You've studied all cards from the deck 🎉</h1>
             <span className="lg:text-xl">Cards studied: {studiedCardsAmount}</span>
             <button 

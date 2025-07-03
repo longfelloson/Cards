@@ -10,7 +10,7 @@ const HeaderModal = ({ onClose }) => {
         <ul className="flex flex-col gap-4 text-white cursor-pointer">
           <li><Link to="/login">Login</Link></li>
           <li onClick={logout}>Logout</li>
-          <li>Settings</li>
+          <li><Link to="/settings">Settings</Link></li>
         </ul>
       </div>
     </>

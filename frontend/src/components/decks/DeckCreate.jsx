@@ -32,7 +32,7 @@ return (
         value={name}
         onChange={handleChange}
         placeholder="Enter the name to create a deck"
-        className="w-full border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
       <button type="submit">

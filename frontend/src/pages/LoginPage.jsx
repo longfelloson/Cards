@@ -14,7 +14,7 @@ const LoginPage = () => {
   return (
     <Layout>
       <form
-        className="flex flex-col gap-3 border border-gray-300 p-6 shadow-md mt-4"
+        className="flex flex-col gap-3 border border-gray-200 p-6 shadow-md mt-4"
         onSubmit={handleSubmit}
       >
         <label htmlFor="email">Email:</label>
