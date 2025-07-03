@@ -10,7 +10,7 @@ class CollectionsRepository(SQLAlchemyRepository):
 
     async def create(self, *, data: CollectionCreate) -> Collection:
         """Create a collection and its cards with provided data"""
-        collection = Collection(name=data.name)
+        collection = self.model(name=data.name)
 
         self.session.add(collection)
         await self.session.flush()
@@ -30,16 +30,14 @@ class CollectionDecksRepository(SQLAlchemyRepository):
 
     async def create(self, collection_id: UUID4, decks_ids: list[UUID4]) -> None:
         for deck_id in decks_ids:
-            collection_deck = CollectionDeck(
-                collection_id=collection_id, deck_id=deck_id
-            )
+            collection_deck = self.model(collection_id=collection_id, deck_id=deck_id)
             self.session.add(collection_deck)
+
         await self.session.flush()
         await self.session.commit()
 
     async def delete(self, collection_id: UUID4) -> None:
         await self.session.execute(
-            delete_(CollectionDeck).where(CollectionDeck.collection_id == collection_id)
+            delete_(self.model).where(self.model.collection_id == collection_id)
         )
-        await self.session.flush()
         await self.session.commit()

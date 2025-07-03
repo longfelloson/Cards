@@ -1,13 +1,13 @@
-from exceptions import NotFound, AlreadyExists
+from exceptions import NotFoundException, AlreadyExistsException
 
 COLLECTION_OBJECT_NAME = "collection"
 
 
-class CollectionNotFound(NotFound):
+class CollectionNotFoundException(NotFoundException):
     def __init__(self):
         super().__init__(object_name=COLLECTION_OBJECT_NAME)
 
 
-class CollectionAlreadyExists(AlreadyExists):
+class CollectionAlreadyExistsException(AlreadyExistsException):
     def __init__(self):
         super().__init__(object_name=COLLECTION_OBJECT_NAME)

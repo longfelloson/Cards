@@ -4,7 +4,7 @@ from pydantic import UUID4
 
 from service import AbstractService
 from unit_of_work import UnitOfWork
-from decks.exceptions import DeckAlreadyExists, DeckNotFound
+from decks.exceptions import DeckAlreadyExistsException, DeckNotFoundException
 from decks.models import Deck
 from decks.schemas import DeckCreate, DeckFilter, DeckUpdate, DecksFilter
 
@@ -22,7 +22,7 @@ class DeckService(AbstractService):
             deck_filter = DeckFilter(name=data.name)
             deck = await self.get_by(filter=deck_filter, uow=uow)
             if deck:
-                raise DeckAlreadyExists()
+                raise DeckAlreadyExistsException()
 
             deck = await uow.decks.create(data=data, user_id=user_id)
             return deck
@@ -37,7 +37,7 @@ class DeckService(AbstractService):
         async with uow:
             deck = await uow.decks.get(id=deck_id)
             if not deck:
-                raise DeckNotFound()
+                raise DeckNotFoundException()
             return deck
 
     async def get_all(

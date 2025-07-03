@@ -4,7 +4,7 @@ from pydantic import UUID4
 from service import AbstractService
 from cards.review import get_card_review
 from unit_of_work import UnitOfWork
-from cards.exceptions import CardAlreadyExists, CardNotFound
+from cards.exceptions import CardAlreadyExistsException, CardNotFoundException
 from cards.schemas import CardCreate, CardFilter, CardUpdate, CardsFilter
 
 from cards.models import Card
@@ -23,16 +23,18 @@ class CardsService(AbstractService):
             card_filter = CardFilter(face=data.face, user_id=user_id)
             card = await uow.cards.get_by(filter=card_filter)
             if card:
-                raise CardAlreadyExists()
+                raise CardAlreadyExistsException()
             card = await uow.cards.create(data=data, user_id=user_id)
             return card
 
-    async def get(self, *, card_id: UUID4, uow: UnitOfWork) -> Card:
+    async def get(
+        self, *, card_id: UUID4, uow: UnitOfWork, raise_error: bool = True
+    ) -> Card:
         """Get a card by its id"""
         async with uow:
             card = await uow.cards.get(id=card_id)
-            if not card:
-                raise CardNotFound()
+            if not card and raise_error:
+                raise CardNotFoundException()
             return card
 
     async def get_by(self, *, filter: CardFilter, uow: UnitOfWork) -> Optional[Card]:
@@ -72,8 +74,10 @@ class CardsService(AbstractService):
     async def delete(self, *, card_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a card by its id"""
         async with uow:
-            card = await self.get(card_id=card_id, uow=uow)
+            card = await self.get(card_id=card_id, uow=uow, raise_error=False)
             await uow.cards.delete(obj=card)
 
 
 service = CardsService()
+# TODO: update delete rep (!) delete by id (will make it restful)
+# TODO: make idempotent GET, DELETE, PATCH

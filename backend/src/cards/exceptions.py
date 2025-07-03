@@ -1,13 +1,13 @@
-from exceptions import AlreadyExists, NotFound
+from exceptions import AlreadyExistsException, NotFoundException
 
 CARD_OBJECT_NAME = "card"
 
 
-class CardNotFound(NotFound):
+class CardNotFoundException(NotFoundException):
     def __init__(self):
         super().__init__(object_name=CARD_OBJECT_NAME)
 
 
-class CardAlreadyExists(AlreadyExists):
+class CardAlreadyExistsException(AlreadyExistsException):
     def __init__(self):
         super().__init__(object_name=CARD_OBJECT_NAME)

@@ -1,7 +1,10 @@
 from typing import Optional
 from pydantic import UUID4
 from service import AbstractService
-from deck_collections.exceptions import CollectionAlreadyExists, CollectionNotFound
+from deck_collections.exceptions import (
+    CollectionAlreadyExistsException,
+    CollectionNotFoundException,
+)
 from deck_collections.schemas import (
     CollectionCreate,
     CollectionFilter,
@@ -19,7 +22,7 @@ class CollectionService(AbstractService):
             collection_filter = CollectionFilter(name=data.name)
             collection = await self.get_by(filter=collection_filter)
             if collection:
-                raise CollectionAlreadyExists()
+                raise CollectionAlreadyExistsException()
             collection = await uow.collections.create(data=data)
             return collection
 
@@ -28,7 +31,7 @@ class CollectionService(AbstractService):
         async with uow:
             collection = await uow.collections.get(id=collection_id)
             if not collection:
-                raise CollectionNotFound()
+                raise CollectionNotFoundException()
             return collection
 
     async def get_by(
