@@ -1,16 +1,22 @@
 import Header from "./Header"
 
-const Layout = ({ children }) => {
+const Layout = ({ children, className }) => {
   return (
     <div>
-      <Header/>
-      <main 
-        className="flex h-screen flex-col gap-8 bg-[#F9FAFB] px-8 md:px-14 pt-8 items-center"
+      <Header />
+      <main
+        className={className}
+        style={{
+          height: '100vh',
+          gap: '2rem',
+          backgroundColor: '#F9FAFB',
+          padding: '3.5rem',
+        }}
       >
         {children}
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;
