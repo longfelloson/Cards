@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 
-from auth.dependencies import get_current_user
+from auth.dependencies import CurrentUserDependency, get_current_user
 from dependencies import UOWDependency
 from users.service import users_service
 from users.schemas import UserCreate, UserUpdate, UserView, UsersFilter
@@ -19,6 +19,12 @@ router = APIRouter()
 async def create_user(data: UserCreate, uow: UOWDependency):
     """Create a user with provided data"""
     user = await users_service.create(data=data, uow=uow)
+    return user
+
+
+@router.get("/me", response_model=UserView, status_code=status.HTTP_200_OK)
+async def get_current_user(user: CurrentUserDependency):
+    """Get the current user"""
     return user
 
 
