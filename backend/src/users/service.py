@@ -72,7 +72,6 @@ class UsersService(AbstractService):
                 await verification_service.confirm_email(
                     token=data.verification_token, uow=uow
                 )
-                user.is_verified = True
                 
             if not data.are_new_column_values_provided(user):
                 return user
