@@ -1,0 +1,7 @@
+p, user, /api/users, get
+p, user, /api/users/me, get
+p, user, /api/users, patch
+p, user, /api/users, post
+p, user, /api/users, delete
+
+g, admin, user
