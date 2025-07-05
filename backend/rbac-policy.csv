@@ -4,4 +4,11 @@ p, user, /api/users, patch
 p, user, /api/users, post
 p, user, /api/users, delete
 
+p, user, /api/decks, post
+p, user, /api/decks, get
+p, user, /api/decks, delete
+
+p, user, /api/cards, post
+p, user, /api/cards, get
+
 g, admin, user
