@@ -20,7 +20,6 @@ export async function loginUser(password, email) {
   const response = await api.post('/auth/token', data);
   
   localStorage.setItem('token', response.data.access_token);
-  window.location.href = '/';
 }
 
 export function logout() {

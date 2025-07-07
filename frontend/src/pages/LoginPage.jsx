@@ -5,18 +5,27 @@ import Layout from "../components/Layout";
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    loginUser(password, email);
+    try {
+      await loginUser(password, email);
+      window.location.href = '/';
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Login failed. Please check your credentials.';
+      setErrorMessage(msg);
+    }
   };
+
 
   return (
     <Layout>
       <form
-        className="flex flex-col gap-3 border border-gray-200 p-6 shadow-md mt-4"
+        className="flex flex-col gap-3 border rounded-md  border-gray-200 p-6 shadow-md mt-4"
         onSubmit={handleSubmit}
       >
+        {errorMessage && <p className="text-red-500 p-4 bg-red-100 rounded-md">{errorMessage}</p>}
         <label htmlFor="email">Email:</label>
         <input
           className="bg-gray-200 p-2 rounded"
