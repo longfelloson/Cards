@@ -27,9 +27,9 @@ class UserUpdate(BaseUpdate):
     password: Optional[str] = None
     email: Optional[EmailStr] = None
 
-    verify_email: Optional[bool] = Field(
+    verify: Optional[bool] = Field(
         default=None,
-        description="Provide True if you need to send verification email to provided email",
+        description="Provide True if you need to verify the password or the email",
     )
     verification_token: Optional[str] = Field(
         default=None,

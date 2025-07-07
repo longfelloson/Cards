@@ -58,21 +58,27 @@ class UsersService(AbstractService):
         confirms the email and updates the user
 
         Returns:
-            User: updated user if fields to update were provided otherwise the 
+            User: updated user if fields to update were provided otherwise the
             same user
         """
         async with uow:
             user = await self.get(user_id=user_id, uow=uow)
-            if data.verify_email:
-                await verification_service.send_verification_email(
-                    new_email=data.email, user=user, uow=uow
+            if data.verify:
+                await verification_service.verify(
+                    user=user,
+                    uow=uow,
+                    new_email=data.email,
+                    new_password=data.password,
                 )
                 return user
             elif data.verification_token:
-                await verification_service.confirm_email(
+                await verification_service.confirm(
                     token=data.verification_token, uow=uow
                 )
-                
+
+            if data.password:
+                data.password = get_hashed_password(data.password)
+
             if not data.are_new_column_values_provided(user):
                 return user
 

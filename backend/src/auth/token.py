@@ -10,9 +10,7 @@ from config import settings
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 
-def create_token(
-    data: dict, expires_delta: Optional[timedelta] = None, access: bool = True
-) -> str:
+def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
 
     if expires_delta:

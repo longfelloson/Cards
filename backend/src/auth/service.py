@@ -19,7 +19,7 @@ class AuthService:
 
         if not verify_password(credentials.password, user.password):
             raise InvalidCredentialsException()
-            
+
         access_token = create_token(data={"sub": user.email})
         return AccessToken(access_token=access_token)
 

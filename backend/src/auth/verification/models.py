@@ -9,6 +9,7 @@ class Verification(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(UUID(as_uuid=True), nullable=False)
     email = Column(String(64), default=None)
+    password = Column(String, default=None)
     created_at = Column(DateTime, default=datetime.now)
     expires_at = Column(DateTime, default=datetime.now)
     token = Column(Text, nullable=False)

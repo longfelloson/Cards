@@ -37,11 +37,21 @@ class EmailMismatchException(HTTPException):
         super().__init__(status_code, detail, headers)
 
 
-class EmailAlreadyInUseException(HTTPException):
+class SameEmailException(HTTPException):
     def __init__(
         self,
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Email already in use",
+        detail="You cannot reuse your current email",
+        headers=None,
+    ):
+        super().__init__(status_code, detail, headers)
+
+
+class SamePasswordException(HTTPException):
+    def __init__(
+        self,
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="You cannot reuse your current password",
         headers=None,
     ):
         super().__init__(status_code, detail, headers)
@@ -62,6 +72,16 @@ class MissingVerificationTokenException(HTTPException):
         self,
         status_code: int = status.HTTP_400_BAD_REQUEST,
         detail: str = "No token was provided to verify email",
+        headers=None,
+    ):
+        super().__init__(status_code, detail, headers)
+
+
+class TooManyVerificationsException(HTTPException):
+    def __init__(
+        self,
+        status_code: int = status.HTTP_400_BAD_REQUEST,
+        detail: str = "Too many verification requests",
         headers=None,
     ):
         super().__init__(status_code, detail, headers)
