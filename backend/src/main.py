@@ -18,7 +18,12 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app_config = {"title": "Cards"}
+if settings.ENVIRONMENT != "local":
+    app_config["openapi_url"] = None
+    
+    
+app = FastAPI(lifespan=lifespan, **app_config)
 
 app.include_router(api_router, prefix=settings.API_V1_PATH)
 

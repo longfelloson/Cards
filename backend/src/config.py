@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Union
+from typing import Annotated, Any, Literal, Union
 from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -76,6 +76,7 @@ class Settings(BaseConfig):
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
+    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     @property
     def verification_url(self) -> str:
