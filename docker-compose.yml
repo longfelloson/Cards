@@ -23,11 +23,37 @@ services:
     networks:
       - default
 
+  redis:
+    image: redis:latest
+    restart: always
+    networks:
+      - default
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - redis-data:/data
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    command: ["redis-server", "--requirepass", $REDIS_PASSWORD]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   backend:
     restart: always
     networks:
       - default
     depends_on:
+      redis:
+        condition: service_healthy
+        restart: true
+
       database:
         condition: service_healthy
         restart: true
@@ -54,6 +80,7 @@ services:
   
 volumes:
   database-data:
+  redis-data:
 
 networks:
   default:

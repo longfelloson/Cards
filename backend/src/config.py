@@ -40,10 +40,25 @@ class AuthConfig(BaseConfig):
     JWT_ALGORITHM: str
 
 
+class RedisConfig(BaseConfig):
+    model_config = SettingsConfigDict(env_prefix="REDIS_")
+
+    HOST: str
+    PORT: int = 6379
+    DB: int = 0
+    PASSWORD: SecretStr
+
+    @property
+    def url(self):
+        password = self.PASSWORD
+        return f"redis://:{password}@{self.HOST}:{self.PORT}/{self.DB}"
+
+
 class Settings(BaseConfig):
     smtp: SMTPConfig = Field(default_factory=SMTPConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     auth: AuthConfig = Field(default_factory=AuthConfig)
+    redis: RedisConfig = Field(default_factory=RedisConfig)
 
     DOMAIN: str
     VERIFICATION_PATH: str
