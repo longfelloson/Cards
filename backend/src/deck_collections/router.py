@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Depends, status
-from pydantic import UUID4
-
 from auth.dependencies import CurrentUserDependency, get_current_user
-from deck_collections.service import service
-from dependencies import UOWDependency
+from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from deck_collections.schemas import (
     CollectionCreate,
+    CollectionsFilter,
     CollectionUpdate,
     CollectionView,
-    CollectionsFilter,
 )
-
+from deck_collections.service import service
+from dependencies import UOWDependency
+from fastapi import APIRouter, Depends, status
+from fastapi_cache.decorator import cache
+from pydantic import UUID4
 
 router = APIRouter()
 
@@ -32,6 +32,7 @@ async def create_collection(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_current_user)],
 )
+@cache(expire=DAY_TTL)
 async def get_collection(collection_id: UUID4, uow: UOWDependency):
     """Get a collection by its id"""
     collection = await service.get(collection_id=collection_id, uow=uow)
@@ -44,6 +45,7 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_current_user)],
 )
+@cache(expire=TWELVE_HOURS_TTL)
 async def get_collections(
     uow: UOWDependency,
     user: CurrentUserDependency,

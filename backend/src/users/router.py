@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, status
-from pydantic import UUID4
-
 from auth.dependencies import CurrentUserDependency
+from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from dependencies import UOWDependency
+from fastapi import APIRouter, Depends, status
+from fastapi_cache.decorator import cache
+from pydantic import UUID4
+from users.schemas import UserCreate, UsersFilter, UserUpdate, UserView
 from users.service import users_service
-from users.schemas import UserCreate, UserUpdate, UserView, UsersFilter
-
 
 router = APIRouter()
 
@@ -32,6 +32,7 @@ async def get_me(user: CurrentUserDependency):
     response_model=list[UserView],
     status_code=status.HTTP_200_OK,
 )
+@cache(expire=TWELVE_HOURS_TTL)
 async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
     """Get users by provided conditions"""
     users = await users_service.get_all(filter=filter, uow=uow)
@@ -39,6 +40,7 @@ async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
 
 
 @router.get("/{user_id}", response_model=UserView, status_code=status.HTTP_200_OK)
+@cache(expire=DAY_TTL)
 async def get_user(user_id: UUID4, uow: UOWDependency):
     """Get a user by its id"""
     user = await users_service.get(user_id=user_id, uow=uow)
