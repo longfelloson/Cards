@@ -69,6 +69,7 @@ class Settings(BaseConfig):
     auth: AuthConfig = Field(default_factory=AuthConfig)
     redis: RedisConfig = Field(default_factory=RedisConfig)
 
+    API_V1_PATH: str = "/api/v1"
     DOMAIN: str
     VERIFICATION_PATH: str
     FRONTEND_HOST: str = "http://localhost:5173"

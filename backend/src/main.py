@@ -17,8 +17,10 @@ async def lifespan(_: FastAPI):
     await db.create_tables()
     yield
 
+
 app = FastAPI(lifespan=lifespan)
-app.include_router(api_router)
+
+app.include_router(api_router, prefix=settings.API_V1_PATH)
 
 app.add_middleware(
     CORSMiddleware,
