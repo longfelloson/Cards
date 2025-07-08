@@ -40,3 +40,6 @@ coverage/
 *.sock
 *.db
 volumes/
+
+# Other
+TODO
