@@ -1,7 +1,16 @@
-from pydantic import EmailStr, Field, SecretStr
+from typing import Annotated, Any, Union
+from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_SMTP_HOST = "smtp.gmail.com"
+
+
+def parse_cors(v: Any) -> Union[list[str], str]:
+    if isinstance(v, str) and not v.startswith("["):
+        return [i.strip() for i in v.split(",")]
+    elif isinstance(v, list | str):
+        return v
+    raise ValueError(v)
 
 
 class BaseConfig(BaseSettings):
@@ -62,11 +71,21 @@ class Settings(BaseConfig):
 
     DOMAIN: str
     VERIFICATION_PATH: str
+    FRONTEND_HOST: str = "http://localhost:5173"
+    BACKEND_CORS_ORIGINS: Annotated[
+        list[AnyUrl] | str, BeforeValidator(parse_cors)
+    ] = []
 
     @property
     def verification_url(self) -> str:
         # 127.0.0.1 + /verification
         return self.DOMAIN + self.VERIFICATION_PATH
+
+    @computed_field
+    @property
+    def all_cors_origins(self) -> list[str]:
+        cors = [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
+        return cors + [self.FRONTEND_HOST]
 
 
 settings = Settings()
