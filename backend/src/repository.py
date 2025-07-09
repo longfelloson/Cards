@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from pydantic import UUID4, BaseModel
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -67,6 +67,10 @@ class SQLAlchemyRepository(AbstractRepository):
 
         return obj
 
-    async def delete(self, *, obj):
+    async def delete_by_obj(self, *, obj):
         await self.session.delete(obj)
+        await self.session.commit()
+
+    async def delete(self, obj_id: int | UUID4) -> None:
+        await self.session.execute(delete(self.model).where(self.model.id == obj_id))
         await self.session.commit()
