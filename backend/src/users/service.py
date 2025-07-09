@@ -1,14 +1,13 @@
 from typing import Optional
 
-from pydantic import UUID4
-
 from auth.password import get_hashed_password
 from auth.verification.service import verification_service
+from pydantic import UUID4
 from service import AbstractService
-from users.exceptions import UserAlreadyExistsException, UserNotFoundException
 from unit_of_work import UnitOfWork
+from users.exceptions import UserAlreadyExistsException, UserNotFoundException
 from users.models import User
-from users.schemas import UserCreate, UserFilter, UserUpdate, UsersFilter
+from users.schemas import UserCreate, UserFilter, UsersFilter, UserUpdate
 
 
 class UsersService(AbstractService):
@@ -90,8 +89,7 @@ class UsersService(AbstractService):
     async def delete(self, *, user_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a user by its id"""
         async with uow:
-            user = await self.get(user_id=user_id)
-            await uow.users.delete(obj=user)
+            await uow.users.delete(obj_id=user_id)
 
 
 users_service = UsersService()

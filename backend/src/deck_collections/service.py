@@ -1,18 +1,19 @@
 from typing import Optional
-from pydantic import UUID4
-from service import AbstractService
+
 from deck_collections.exceptions import (
     CollectionAlreadyExistsException,
     CollectionNotFoundException,
 )
+from deck_collections.models import Collection
 from deck_collections.schemas import (
     CollectionCreate,
     CollectionFilter,
-    CollectionUpdate,
     CollectionsFilter,
+    CollectionUpdate,
 )
+from pydantic import UUID4
+from service import AbstractService
 from unit_of_work import UnitOfWork
-from deck_collections.models import Collection
 
 
 class CollectionService(AbstractService):
@@ -77,8 +78,7 @@ class CollectionService(AbstractService):
     async def delete(self, *, collection_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a collection by its id"""
         async with uow:
-            collection = await self.get(collection_id=collection_id, uow=uow)
-            await uow.collections.delete(obj=collection)
+            await uow.collections.delete(onj_id=collection_id)
 
 
 service = CollectionService()

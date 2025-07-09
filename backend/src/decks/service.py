@@ -1,12 +1,11 @@
 from typing import Optional
 
-from pydantic import UUID4
-
-from service import AbstractService
-from unit_of_work import UnitOfWork
 from decks.exceptions import DeckAlreadyExistsException, DeckNotFoundException
 from decks.models import Deck
-from decks.schemas import DeckCreate, DeckFilter, DeckUpdate, DecksFilter
+from decks.schemas import DeckCreate, DeckFilter, DecksFilter, DeckUpdate
+from pydantic import UUID4
+from service import AbstractService
+from unit_of_work import UnitOfWork
 
 
 class DeckService(AbstractService):
@@ -76,8 +75,7 @@ class DeckService(AbstractService):
     async def delete(self, *, deck_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a deck by its id"""
         async with uow:
-            deck = await self.get(deck_id=deck_id, uow=uow)
-            await uow.decks.delete(obj=deck)
+            await uow.decks.delete(obj_id=deck_id)
 
 
 service = DeckService()
