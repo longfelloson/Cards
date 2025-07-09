@@ -8,10 +8,10 @@ from decks.schemas import DeckCreate, DecksFilter, DeckUpdate, DeckView
 from decks.service import service
 from dependencies import UOWDependency
 
-router = APIRouter()
+v1_router = APIRouter()
 
 
-@router.post(
+@v1_router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=DeckView,
@@ -28,7 +28,7 @@ async def create_deck(
     return deck
 
 
-@router.get(
+@v1_router.get(
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
@@ -41,7 +41,7 @@ async def get_deck(deck_id: UUID4, uow: UOWDependency):
     return deck
 
 
-@router.get("", status_code=status.HTTP_200_OK, response_model=list[DeckView])
+@v1_router.get("", status_code=status.HTTP_200_OK, response_model=list[DeckView])
 @cache(expire=TWELVE_HOURS_TTL)
 async def get_decks(
     uow: UOWDependency,
@@ -53,7 +53,7 @@ async def get_decks(
     return decks
 
 
-@router.patch(
+@v1_router.patch(
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
@@ -65,7 +65,7 @@ async def update_deck(deck_id: UUID4, data: DeckUpdate, uow: UOWDependency):
     return deck
 
 
-@router.delete(
+@v1_router.delete(
     "/{deck_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )

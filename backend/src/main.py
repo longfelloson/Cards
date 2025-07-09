@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
-from api import api_router
+from api import api_v1_router
 from cache.redis import redis_client
 from database import db
 from config import settings
@@ -21,11 +21,15 @@ async def lifespan(_: FastAPI):
 app_config = {"title": "Cards"}
 if settings.ENVIRONMENT != "local":
     app_config["openapi_url"] = None
-    
-    
+
+
 app = FastAPI(lifespan=lifespan, **app_config)
 
-app.include_router(api_router, prefix=settings.API_V1_PATH)
+versioned_routers = {"1": api_v1_router}
+app.include_router(
+    versioned_routers[str(settings.API_VERSION)], prefix=settings.api_prefix
+)
+
 
 app.add_middleware(
     CORSMiddleware,

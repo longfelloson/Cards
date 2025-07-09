@@ -8,10 +8,10 @@ from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
 from cards.service import service
 from dependencies import UOWDependency
 
-router = APIRouter()
+v1_router = APIRouter()
 
 
-@router.post(
+@v1_router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=CardView,
@@ -26,7 +26,7 @@ async def create_card(
     return card
 
 
-@router.get(
+@v1_router.get(
     path="",
     response_model=list[CardView],
     status_code=status.HTTP_200_OK,
@@ -42,7 +42,7 @@ async def get_cards(
     return cards
 
 
-@router.get(
+@v1_router.get(
     path="/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
@@ -55,7 +55,7 @@ async def get_card(card_id: UUID4, uow: UOWDependency):
     return card
 
 
-@router.patch(
+@v1_router.patch(
     "/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
@@ -67,7 +67,7 @@ async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     return card
 
 
-@router.delete(
+@v1_router.delete(
     path="/{card_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,

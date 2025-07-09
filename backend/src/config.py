@@ -1,4 +1,5 @@
 from typing import Annotated, Any, Literal
+
 from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -69,13 +70,15 @@ class Settings(BaseConfig):
     auth: AuthConfig = Field(default_factory=AuthConfig)
     redis: RedisConfig = Field(default_factory=RedisConfig)
 
-    API_V1_PATH: str = "/api/v1"
+    API_VERSION: int | float
+
     DOMAIN: str
     VERIFICATION_PATH: str
     FRONTEND_HOST: str = "http://localhost:5173"
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
+
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     @property
@@ -88,6 +91,10 @@ class Settings(BaseConfig):
     def all_cors_origins(self) -> list[str]:
         cors = [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
         return cors + [self.FRONTEND_HOST]
+
+    @property
+    def api_prefix(self) -> str:
+        return f"/api/v{self.API_VERSION}"
 
 
 settings = Settings()

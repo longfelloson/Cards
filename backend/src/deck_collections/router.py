@@ -12,10 +12,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
-router = APIRouter()
+v1_router = APIRouter()
 
 
-@router.post("", response_model=CollectionView, status_code=status.HTTP_201_CREATED)
+@v1_router.post("", response_model=CollectionView, status_code=status.HTTP_201_CREATED)
 async def create_collection(
     data: CollectionCreate,
     uow: UOWDependency,
@@ -26,7 +26,7 @@ async def create_collection(
     return collection
 
 
-@router.get(
+@v1_router.get(
     "/{collection_id}",
     response_model=CollectionView,
     status_code=status.HTTP_200_OK,
@@ -39,7 +39,7 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     return collection
 
 
-@router.get(
+@v1_router.get(
     "",
     response_model=list[CollectionView],
     status_code=status.HTTP_200_OK,
@@ -56,7 +56,7 @@ async def get_collections(
     return collections
 
 
-@router.patch(
+@v1_router.patch(
     "/{collection_id}",
     response_model=CollectionView,
     status_code=status.HTTP_200_OK,
@@ -70,7 +70,7 @@ async def update_collection(
     return collection
 
 
-@router.delete(
+@v1_router.delete(
     "/{collection_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,

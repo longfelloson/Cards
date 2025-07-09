@@ -7,10 +7,10 @@ from pydantic import UUID4
 from users.schemas import UserCreate, UsersFilter, UserUpdate, UserView
 from users.service import users_service
 
-router = APIRouter()
+v1_router = APIRouter()
 
 
-@router.post(
+@v1_router.post(
     "",
     response_model=UserView,
     status_code=status.HTTP_200_OK,
@@ -21,13 +21,13 @@ async def create_user(data: UserCreate, uow: UOWDependency):
     return user
 
 
-@router.get("/me", response_model=UserView, status_code=status.HTTP_200_OK)
+@v1_router.get("/me", response_model=UserView, status_code=status.HTTP_200_OK)
 async def get_me(user: CurrentUserDependency):
     """Get the current user"""
     return user
 
 
-@router.get(
+@v1_router.get(
     "",
     response_model=list[UserView],
     status_code=status.HTTP_200_OK,
@@ -39,7 +39,7 @@ async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
     return users
 
 
-@router.get("/{user_id}", response_model=UserView, status_code=status.HTTP_200_OK)
+@v1_router.get("/{user_id}", response_model=UserView, status_code=status.HTTP_200_OK)
 @cache(expire=DAY_TTL)
 async def get_user(user_id: UUID4, uow: UOWDependency):
     """Get a user by its id"""
@@ -47,7 +47,7 @@ async def get_user(user_id: UUID4, uow: UOWDependency):
     return user
 
 
-@router.patch(
+@v1_router.patch(
     "/{user_id}",
     response_model=UserView,
     status_code=status.HTTP_200_OK,
@@ -62,7 +62,7 @@ async def update_user(
     return user
 
 
-@router.delete(
+@v1_router.delete(
     "/{user_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
