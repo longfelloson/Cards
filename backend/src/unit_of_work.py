@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 from auth.verification.repository import VerificationRepository
+from cards.repository import CardsRepository
+from database import async_session_maker
 from deck_collections.repository import CollectionDecksRepository, CollectionsRepository
 from decks.repository import DecksRepository
 from users.repository import UsersRepository
-from database import async_session_maker
-from cards.repository import CardsRepository
 
 
 class IUnitOfWork(ABC):

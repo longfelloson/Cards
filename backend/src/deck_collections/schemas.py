@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import UUID4, BaseModel
 
 from decks.schemas import DeckView
-from schemas import BaseUpdate, BaseFilter
+from pydantic import UUID4, BaseModel
+from schemas import BaseFilter, BaseUpdate
 
 
 class CollectionCreate(BaseModel):

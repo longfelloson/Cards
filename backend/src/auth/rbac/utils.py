@@ -1,5 +1,5 @@
-from auth.rbac.enums import Action, Resource
 from auth.rbac.enforce import ENFORCER
+from auth.rbac.enums import Action, Resource
 from users.models import User
 
 

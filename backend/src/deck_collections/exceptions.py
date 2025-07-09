@@ -1,4 +1,4 @@
-from exceptions import NotFoundException, AlreadyExistsException
+from exceptions import AlreadyExistsException, NotFoundException
 
 COLLECTION_OBJECT_NAME = "collection"
 

@@ -73,7 +73,7 @@ async def update_collection(
 @router.delete(
     "/{collection_id}",
     response_model=None,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(get_current_user)],
 )
 async def delete_collection(collection_id: UUID4, uow: UOWDependency):

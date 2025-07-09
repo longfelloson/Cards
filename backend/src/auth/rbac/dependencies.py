@@ -1,8 +1,7 @@
-from fastapi import Depends, Request
-
 from auth.dependencies import get_current_user
 from auth.rbac.exceptions import AccessDeniedException
 from auth.rbac.utils import get_request_resource, has_access_to_resource
+from fastapi import Depends, Request
 from users.models import User
 
 

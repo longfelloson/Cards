@@ -1,6 +1,7 @@
 from datetime import datetime
-from sqlalchemy import UUID, Boolean, Column, DateTime, Integer, String, Text
+
 from database import Base
+from sqlalchemy import UUID, Boolean, Column, DateTime, Integer, String, Text
 
 
 class Verification(Base):

@@ -1,11 +1,12 @@
 from datetime import datetime
-from pydantic import UUID4
-from sqlalchemy import and_, or_, select
+
 from cards.models import Card
 from deck_collections.models import CollectionDeck
-from decks.schemas import DecksFilter
 from decks.models import Deck
+from decks.schemas import DecksFilter
+from pydantic import UUID4
 from repository import SQLAlchemyRepository
+from sqlalchemy import and_, or_, select
 
 
 class DecksRepository(SQLAlchemyRepository):
@@ -28,7 +29,7 @@ class DecksRepository(SQLAlchemyRepository):
                 .filter(
                     or_(
                         Card.next_review_at <= datetime.now(),
-                        Card.next_review_at == None,
+                        Card.next_review_at.is_(None),
                     )
                 )
                 .distinct()

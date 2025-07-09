@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import UUID4, BaseModel, ConfigDict
 
 from cards.enums import MemorizationLevel
-from schemas import BaseUpdate
-from schemas import BaseFilter
+from pydantic import UUID4, BaseModel, ConfigDict
+from schemas import BaseFilter, BaseUpdate
 
 
 class CardCreate(BaseModel):

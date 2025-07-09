@@ -4,15 +4,15 @@ from urllib.parse import urlencode
 
 from pydantic import EmailStr, HttpUrl
 
-from auth.token import decode_token
 from auth.exceptions import ExpiredTokenException, InvalidTokenException
+from auth.token import decode_token
 from auth.verification.exceptions import (
     ExpiredLinkException,
     InvalidLinkException,
     MissingVerificationTokenException,
 )
-from emails.utils import send_email
 from config import settings
+from emails.utils import send_email
 
 
 def decode_verification_token(*, token: Optional[str]) -> EmailStr:
@@ -46,7 +46,7 @@ async def send_verification_link(email: EmailStr, token: str) -> None:
 def generate_verification_link(token: str, new_email: EmailStr = None) -> HttpUrl:
     params = {"token": token}
     if new_email:
-        params["email": new_email]
-        
+        params["email":new_email]
+
     verification_link = settings.verification_url + "?" + urlencode(params)
     return verification_link

@@ -70,7 +70,7 @@ async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
 @router.delete(
     path="/{card_id}",
     response_model=None,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(get_current_user)],
 )
 async def delete_card(card_id: UUID4, uow: UOWDependency):

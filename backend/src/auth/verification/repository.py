@@ -1,8 +1,9 @@
 from typing import Optional
-from pydantic import EmailStr, UUID4
-from sqlalchemy import insert, select, update
+
 from auth.verification.models import Verification
+from pydantic import UUID4, EmailStr
 from repository import SQLAlchemyRepository
+from sqlalchemy import insert, select, update
 
 
 class VerificationRepository(SQLAlchemyRepository):

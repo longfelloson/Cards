@@ -1,8 +1,7 @@
-from fastapi import APIRouter, status
-
 from auth.schemas import AccessToken
 from auth.service import auth_service
 from dependencies import UOWDependency
+from fastapi import APIRouter, status
 from users.schemas import UserCredentials
 
 router = APIRouter()

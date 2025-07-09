@@ -1,7 +1,7 @@
 from typing import ClassVar, Optional
-from pydantic import BaseModel, Field, field_validator, model_validator
 
 from exceptions import NoFieldsProvidedException
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class BaseFilter(BaseModel):

@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi.security import OAuth2PasswordBearer
-import jwt
 
+import jwt
 from auth.exceptions import ExpiredTokenException, InvalidTokenException
 from config import settings
-
+from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 

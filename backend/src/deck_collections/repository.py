@@ -1,6 +1,6 @@
-from pydantic import UUID4
-from deck_collections.schemas import CollectionCreate
 from deck_collections.models import Collection, CollectionDeck
+from deck_collections.schemas import CollectionCreate
+from pydantic import UUID4
 from repository import SQLAlchemyRepository
 from sqlalchemy import delete as delete_
 

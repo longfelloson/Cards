@@ -1,10 +1,9 @@
-from datetime import datetime
 import uuid
-
-from sqlalchemy import UUID, Column, DateTime, ForeignKey, String
-from sqlalchemy.orm import relationship
+from datetime import datetime
 
 from database import Base
+from sqlalchemy import UUID, Column, DateTime, ForeignKey, String
+from sqlalchemy.orm import relationship
 
 
 class Deck(Base):

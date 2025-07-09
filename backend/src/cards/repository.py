@@ -1,8 +1,9 @@
 from datetime import datetime
-from sqlalchemy import and_, or_, select
-from cards.schemas import CardsFilter
+
 from cards.models import Card
+from cards.schemas import CardsFilter
 from repository import SQLAlchemyRepository
+from sqlalchemy import and_, or_, select
 
 
 class CardsRepository(SQLAlchemyRepository):
@@ -20,7 +21,7 @@ class CardsRepository(SQLAlchemyRepository):
             conditions.append(
                 or_(
                     self.model.next_review_at <= datetime.now(),
-                    self.model.next_review_at == None,
+                    self.model.next_review_at.is_(None),
                 )
             )
 

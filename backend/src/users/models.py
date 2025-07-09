@@ -1,10 +1,10 @@
-from datetime import datetime
 import uuid
-from sqlalchemy import UUID, Boolean, Column, DateTime, String
-from sqlalchemy.orm import relationship
+from datetime import datetime
 
 from auth.rbac.enums import Role
 from database import Base
+from sqlalchemy import UUID, Boolean, Column, DateTime, String
+from sqlalchemy.orm import relationship
 
 
 class User(Base):

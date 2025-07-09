@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
 
-
 ALREADY_EXISTS_TEMPLATE = "The {} already exists"
 NOT_FOUND_TEMPLATE = "The {} was not found"
 NO_FIELDS_PROVIDED_TEMPLATE = "No fields were provided to update the {}"

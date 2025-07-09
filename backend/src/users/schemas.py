@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import UUID4, EmailStr, BaseModel, Field
 
+from pydantic import UUID4, BaseModel, EmailStr, Field
+from schemas import BaseFilter, BaseUpdate
 from users.models import User
-from schemas import BaseUpdate, BaseFilter
 
 
 class UserCredentials(BaseModel):

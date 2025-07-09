@@ -1,11 +1,11 @@
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_SMTP_HOST = "smtp.gmail.com"
 
 
-def parse_cors(v: Any) -> Union[list[str], str]:
+def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
     elif isinstance(v, list | str):

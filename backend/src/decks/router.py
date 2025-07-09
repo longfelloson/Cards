@@ -68,7 +68,6 @@ async def update_deck(deck_id: UUID4, data: DeckUpdate, uow: UOWDependency):
 @router.delete(
     "/{deck_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(get_current_user)],
 )
 async def delete_deck(deck_id: UUID4, uow: UOWDependency):
     """Delete a deck by its ID"""

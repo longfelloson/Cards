@@ -1,19 +1,18 @@
 from datetime import datetime, timedelta
 
-from pydantic import EmailStr
-
-from auth.verification.utils import (
-    decode_verification_token,
-    send_verification_link,
-)
 from auth.password import verify_password
 from auth.token import create_token
-from emails.exceptions import EmailSendingFailedException
 from auth.verification.exceptions import (
     SameEmailException,
     SamePasswordException,
     TooManyVerificationsException,
 )
+from auth.verification.utils import (
+    decode_verification_token,
+    send_verification_link,
+)
+from emails.exceptions import EmailSendingFailedException
+from pydantic import EmailStr
 from unit_of_work import UnitOfWork
 from users.models import User
 

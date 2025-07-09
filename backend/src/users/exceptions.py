@@ -1,4 +1,4 @@
-from exceptions import NotFoundException, AlreadyExistsException
+from exceptions import AlreadyExistsException, NotFoundException
 
 USER_OBJECT_NAME = "user"
 
