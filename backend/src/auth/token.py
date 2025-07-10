@@ -6,7 +6,7 @@ from auth.exceptions import ExpiredTokenException, InvalidTokenException
 from config import settings
 from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.api_prefix}/auth/token")
 
 
 def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
