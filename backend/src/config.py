@@ -60,7 +60,7 @@ class RedisConfig(BaseConfig):
 
     @property
     def url(self):
-        password = self.PASSWORD
+        password = self.PASSWORD.get_secret_value()
         return f"redis://:{password}@{self.HOST}:{self.PORT}/{self.DB}"
 
 
