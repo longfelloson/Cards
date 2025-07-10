@@ -1,14 +1,15 @@
-p, user, /api/users, get
-p, user, /api/users/me, get
-p, user, /api/users, patch
-p, user, /api/users, post
-p, user, /api/users, delete
+p, user, users/:id, get
+p, user, users/me, get
+p, user, users/:id, patch
+p, user, users/:id, post
+p, user, users/:id, delete
 
-p, user, /api/decks, post
-p, user, /api/decks, get
-p, user, /api/decks, delete
+p, user, decks, post
+p, user, decks, get
+p, user, decks/:id, get
+p, user, decks, delete
 
-p, user, /api/cards, post
-p, user, /api/cards, get
+p, user, cards, post
+p, user, cards, get
 
 g, admin, user
