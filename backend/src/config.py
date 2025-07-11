@@ -57,6 +57,7 @@ class RedisConfig(BaseConfig):
     PORT: int = 6379
     DB: int = 0
     PASSWORD: SecretStr
+    DB_PREFIX: str = "cache"
 
     @property
     def url(self):
