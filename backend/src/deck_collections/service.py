@@ -1,5 +1,7 @@
 from typing import Optional
 
+from cache.keys import Key
+from cache.core import storage
 from deck_collections.exceptions import (
     CollectionAlreadyExistsException,
     CollectionNotFoundException,
@@ -17,7 +19,13 @@ from unit_of_work import UnitOfWork
 
 
 class CollectionService(AbstractService):
-    async def create(self, *, data: CollectionCreate, uow: UnitOfWork) -> Collection:
+    def __init__(self, *, storage, cache_keys):
+        self.storage = storage
+        self.cache_keys = cache_keys
+
+    async def create(
+        self, *, data: CollectionCreate, user_id: UUID4, uow: UnitOfWork
+    ) -> Collection:
         """Create a collection with provided data"""
         async with uow:
             collection_filter = CollectionFilter(name=data.name)
@@ -26,6 +34,8 @@ class CollectionService(AbstractService):
                 raise CollectionAlreadyExistsException()
             collection = await uow.collections.create(data=data, user_id=user_id)
 
+            await self.clear_collection_related_cache(collection.id)
+            
             return collection
 
     async def get(self, *, collection_id: UUID4, uow: UnitOfWork) -> Collection:
@@ -74,12 +84,20 @@ class CollectionService(AbstractService):
             await uow.commit()
             await uow.session.refresh(updated_collection)
 
+            await self.clear_collection_related_cache(collection_id)
+
             return updated_collection
 
     async def delete(self, *, collection_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a collection by its id"""
         async with uow:
-            await uow.collections.delete(onj_id=collection_id)
+            await uow.collections.delete(obj_id=collection_id)
+            await self.clear_collection_related_cache(collection_id)
+
+    async def clear_collection_related_cache(self, collection_id: UUID4) -> None:
+        await self.storage.clear_cache_by_keys(
+            self.cache_keys.collection(collection_id), self.cache_keys
+        )
 
 
-service = CollectionService()
+service = CollectionService(storage=storage, cache_keys=Key)

@@ -3,6 +3,7 @@ from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
 from auth.dependencies import CurrentUserDependency, get_current_user
+from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from decks.schemas import DeckCreate, DecksFilter, DeckUpdate, DeckView
 from decks.service import service
@@ -34,7 +35,7 @@ async def create_deck(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_current_user)],
 )
-@cache(expire=DAY_TTL)
+@cache(expire=DAY_TTL, namespace=Namespace.DECK)
 async def get_deck(deck_id: UUID4, uow: UOWDependency):
     """Get a deck by provided ID"""
     deck = await service.get(deck_id=deck_id, uow=uow)
@@ -42,7 +43,7 @@ async def get_deck(deck_id: UUID4, uow: UOWDependency):
 
 
 @v1_router.get("", status_code=status.HTTP_200_OK, response_model=list[DeckView])
-@cache(expire=TWELVE_HOURS_TTL)
+@cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.DECKS)
 async def get_decks(
     uow: UOWDependency,
     user: CurrentUserDependency,

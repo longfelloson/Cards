@@ -1,4 +1,5 @@
 from auth.dependencies import CurrentUserDependency, get_current_user
+from backend.src.cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from deck_collections.schemas import (
     CollectionCreate,
@@ -32,7 +33,7 @@ async def create_collection(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_current_user)],
 )
-@cache(expire=DAY_TTL)
+@cache(expire=DAY_TTL, namespace=Namespace.COLLECTION)
 async def get_collection(collection_id: UUID4, uow: UOWDependency):
     """Get a collection by its id"""
     collection = await service.get(collection_id=collection_id, uow=uow)
@@ -45,7 +46,7 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_current_user)],
 )
-@cache(expire=TWELVE_HOURS_TTL)
+@cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.COLLECTIONS)
 async def get_collections(
     uow: UOWDependency,
     user: CurrentUserDependency,

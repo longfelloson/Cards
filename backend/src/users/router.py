@@ -1,4 +1,5 @@
 from auth.dependencies import CurrentUserDependency
+from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from dependencies import UOWDependency
 from fastapi import APIRouter, Depends, status
@@ -32,7 +33,7 @@ async def get_me(user: CurrentUserDependency):
     response_model=list[UserView],
     status_code=status.HTTP_200_OK,
 )
-@cache(expire=TWELVE_HOURS_TTL)
+@cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.USERS)
 async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
     """Get users by provided conditions"""
     users = await users_service.get_all(filter=filter, uow=uow)
@@ -40,7 +41,7 @@ async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
 
 
 @v1_router.get("/{user_id}", response_model=UserView, status_code=status.HTTP_200_OK)
-@cache(expire=DAY_TTL)
+@cache(expire=DAY_TTL, namespace=Namespace.USER)
 async def get_user(user_id: UUID4, uow: UOWDependency):
     """Get a user by its id"""
     user = await users_service.get(user_id=user_id, uow=uow)

@@ -3,6 +3,8 @@ from typing import Optional
 from auth.password import get_hashed_password
 from auth.verification.service import verification_service
 from pydantic import UUID4
+from cache.keys import Key
+from cache.core import storage
 from service import AbstractService
 from unit_of_work import UnitOfWork
 from users.exceptions import UserAlreadyExistsException, UserNotFoundException
@@ -11,9 +13,11 @@ from users.schemas import UserCreate, UserFilter, UsersFilter, UserUpdate
 
 
 class UsersService(AbstractService):
-    def __init__(self, *, verification_service):
+    def __init__(self, *, verification_service, storage, cache_keys):
         self.verification_service = verification_service
-        
+        self.storage = storage
+        self.cache_keys = cache_keys
+
     async def create(self, *, data: UserCreate, uow: UnitOfWork) -> User:
         """Creates a user with provided data"""
         data.password = get_hashed_password(data.password)
@@ -23,6 +27,9 @@ class UsersService(AbstractService):
             if user:
                 raise UserAlreadyExistsException()
             user = await uow.users.create(data=data)
+
+            await self.clear_user_related_cache(user.id)
+
             return user
 
     async def get(
@@ -87,12 +94,22 @@ class UsersService(AbstractService):
             update_data = data.model_dump(exclude_none=True)
             updated_user = await uow.users.update(obj=user, data=update_data)
 
+            await self.clear_user_related_cache(user_id)
+
             return updated_user
 
     async def delete(self, *, user_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a user by its id"""
         async with uow:
             await uow.users.delete(obj_id=user_id)
+            await self.clear_user_related_cache(user_id)
+
+    async def clear_user_related_cache(self, user_id: UUID4) -> None:
+        await self.storage.clear_cache_by_keys(
+            self.cache_keys.user(user_id), self.cache_keys.users()
+        )
 
 
-users_service = UsersService(verification_service=verification_service)
+users_service = UsersService(
+    verification_service=verification_service, storage=storage, cache_keys=Key
+)

@@ -6,6 +6,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 from api import api_v1_router
+from cache.utils import request_key_builder
 from cache.redis import redis_client
 from database import db
 from config import settings
@@ -13,7 +14,11 @@ from config import settings
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    FastAPICache.init(backend=RedisBackend(redis_client), prefix="fastapi-cache")
+    FastAPICache.init(
+        backend=RedisBackend(redis_client),
+        prefix=settings.redis.DB_PREFIX,
+        key_builder=request_key_builder,
+    )
     await db.create_tables()
     yield
 

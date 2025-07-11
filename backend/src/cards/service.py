@@ -1,5 +1,7 @@
 from typing import Optional
 
+from cache.keys import Key
+from cache.core import storage
 from cards.exceptions import CardAlreadyExistsException, CardNotFoundException
 from cards.models import Card
 from cards.review import get_card_review
@@ -10,6 +12,10 @@ from unit_of_work import UnitOfWork
 
 
 class CardsService(AbstractService):
+    def __init__(self, *, storage, cache_keys):
+        self.storage = storage
+        self.cache_keys = cache_keys
+
     async def create(
         self,
         *,
@@ -24,6 +30,9 @@ class CardsService(AbstractService):
             if card:
                 raise CardAlreadyExistsException()
             card = await uow.cards.create(data=data, user_id=user_id)
+
+            await self.clear_card_related_cache(card.id)
+
             return card
 
     async def get(
@@ -68,12 +77,21 @@ class CardsService(AbstractService):
                 update_data.update(card_review.model_dump(exclude_none=True))
 
             updated_card = await uow.cards.update(obj=card, data=update_data)
+
+            await self.clear_card_related_cache(card_id)
+
             return updated_card
 
     async def delete(self, *, card_id: UUID4, uow: UnitOfWork) -> None:
         """Delete a card by its id"""
         async with uow:
             await uow.cards.delete(obj_id=card_id)
+            await self.clear_card_related_cache(card_id)
+
+    async def clear_card_related_cache(self, card_id: UUID4) -> None:
+        await self.storage.clear_cache_by_keys(
+            self.cache_keys.card(card_id), self.cache_keys.cards()
+        )
 
 
-service = CardsService()
+service = CardsService(storage=storage, cache_keys=Key)
