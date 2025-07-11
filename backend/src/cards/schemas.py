@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from cards.models import Card
 from cards.enums import MemorizationLevel
 from pydantic import UUID4, BaseModel, ConfigDict
 from schemas import BaseFilter, BaseUpdate
@@ -30,7 +31,8 @@ class CardView(BaseModel):
 
 
 class CardUpdate(BaseUpdate):
-    _object_name = "card"
+    object_name = "card"
+    model = Card
 
     face: Optional[str] = None
     turnover: Optional[str] = None

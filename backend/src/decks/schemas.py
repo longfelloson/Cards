@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import UUID4, BaseModel
+from decks.models import Deck
 from schemas import BaseFilter, BaseUpdate
 
 
@@ -17,7 +18,8 @@ class DeckView(BaseModel):
 
 
 class DeckUpdate(BaseUpdate):
-    _object_name = "deck"
+    object_name = "deck"
+    model = Deck
 
     name: Optional[str] = None
 

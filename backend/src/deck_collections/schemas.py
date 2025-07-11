@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from deck_collections.models import Collection
 from decks.schemas import DeckView
 from pydantic import UUID4, BaseModel
 from schemas import BaseFilter, BaseUpdate
@@ -19,7 +20,8 @@ class CollectionView(BaseModel):
 
 
 class CollectionUpdate(BaseUpdate):
-    _object_name = "collection"
+    object_name = "collection"
+    model = Collection
 
     name: Optional[str] = None
     decks_ids: Optional[list[UUID4]] = None
