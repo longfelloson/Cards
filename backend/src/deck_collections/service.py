@@ -24,7 +24,8 @@ class CollectionService(AbstractService):
             collection = await self.get_by(filter=collection_filter)
             if collection:
                 raise CollectionAlreadyExistsException()
-            collection = await uow.collections.create(data=data)
+            collection = await uow.collections.create(data=data, user_id=user_id)
+
             return collection
 
     async def get(self, *, collection_id: UUID4, uow: UnitOfWork) -> Collection:

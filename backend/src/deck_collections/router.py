@@ -22,7 +22,7 @@ async def create_collection(
     user: CurrentUserDependency,
 ):
     """Create a collection with provided data"""
-    collection = await service.create(data=data, uow=uow)
+    collection = await service.create(data=data, user_id=user.id, uow=uow)
     return collection
 
 

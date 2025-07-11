@@ -12,7 +12,8 @@ class Collection(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(64), nullable=False)
     created_at = Column(DateTime, default=datetime.now)
-
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
     collection_decks = relationship(
         "CollectionDeck", back_populates="collection", cascade="all, delete-orphan"
     )
