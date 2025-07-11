@@ -8,6 +8,9 @@ from users.service import users_service
 
 
 class AuthService:
+    def __init__(self, *, users_service):
+        self.users_service = users_service
+        
     async def login(
         self, *, credentials: UserCredentials, uow: UnitOfWork
     ) -> AccessToken:
@@ -24,4 +27,4 @@ class AuthService:
         return AccessToken(access_token=access_token)
 
 
-auth_service = AuthService()
+auth_service = AuthService(users_service=users_service)
