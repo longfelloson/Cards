@@ -11,6 +11,9 @@ from users.schemas import UserCreate, UserFilter, UsersFilter, UserUpdate
 
 
 class UsersService(AbstractService):
+    def __init__(self, *, verification_service):
+        self.verification_service = verification_service
+        
     async def create(self, *, data: UserCreate, uow: UnitOfWork) -> User:
         """Creates a user with provided data"""
         data.password = get_hashed_password(data.password)
@@ -63,7 +66,7 @@ class UsersService(AbstractService):
         async with uow:
             user = await self.get(user_id=user_id, uow=uow)
             if data.verify:
-                await verification_service.verify(
+                await self.verification_service.verify(
                     user=user,
                     uow=uow,
                     new_email=data.email,
@@ -71,7 +74,7 @@ class UsersService(AbstractService):
                 )
                 return user
             elif data.verification_token:
-                await verification_service.confirm(
+                await self.verification_service.confirm(
                     token=data.verification_token, uow=uow
                 )
 
@@ -92,4 +95,4 @@ class UsersService(AbstractService):
             await uow.users.delete(obj_id=user_id)
 
 
-users_service = UsersService()
+users_service = UsersService(verification_service=verification_service)
