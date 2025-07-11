@@ -7,9 +7,12 @@ p, user, users/:id, delete
 p, user, decks, post
 p, user, decks, get
 p, user, decks/:id, get
-p, user, decks, delete
+p, user, decks/:id, patch
+p, user, decks/:id, delete
 
 p, user, cards, post
 p, user, cards, get
+p, user, cards/:id, get
+p, user, cards/:id, delete
 
 g, admin, user
