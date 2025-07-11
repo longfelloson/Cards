@@ -8,9 +8,9 @@ from sqlalchemy import delete as delete_
 class CollectionsRepository(SQLAlchemyRepository):
     model = Collection
 
-    async def create(self, *, data: CollectionCreate) -> Collection:
+    async def create(self, *, data: CollectionCreate, user_id: UUID4) -> Collection:
         """Create a collection and its cards with provided data"""
-        collection = self.model(name=data.name)
+        collection = self.model(name=data.name, user_id=user_id)
 
         self.session.add(collection)
         await self.session.flush()
