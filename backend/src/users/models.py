@@ -31,6 +31,8 @@ class User(Base):
     )
     role = Column(String(32), nullable=False, default=Role.USER)
     is_verified = Column(Boolean, nullable=False, default=False)
+    role = Column(String(32), nullable=False, default=Role.USER)
+    is_verified = Column(Boolean, nullable=False, default=False)
 
     cards = relationship("Card", back_populates="user")
     decks = relationship("Deck", back_populates="user")
