@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from auth.password import get_hashed_password
 from auth.verification.service import verification_service
@@ -28,16 +28,12 @@ class UsersService(AbstractService):
                 raise UserAlreadyExistsException()
             user = await uow.users.create(data=data)
 
+            await uow.commit()
             await self.clear_user_related_cache(user.id)
 
             return user
 
-    async def get(
-        self,
-        *,
-        user_id: UUID4,
-        uow: UnitOfWork,
-    ) -> User:
+    async def get(self, *, user_id: UUID4, uow: UnitOfWork) -> User:
         """Get a user by its ID"""
         async with uow:
             user = await uow.users.get(id=user_id)
@@ -53,14 +49,18 @@ class UsersService(AbstractService):
 
     async def get_all(
         self, *, filter: UsersFilter, uow: UnitOfWork
-    ) -> list[Optional[User]]:
+    ) -> List[Optional[User]]:
         """Get users by provided conditions"""
         async with uow:
             users = await uow.users.get_all(filter=filter)
             return users
 
     async def update(
-        self, *, user_id: UUID4, data: UserUpdate, uow: UnitOfWork
+        self,
+        *,
+        user_id: UUID4,
+        data: UserUpdate,
+        uow: UnitOfWork,
     ) -> Optional[User]:
         """Updates user if data.verify_email wasn't provided. if it was provided -
         send verification email. If email was provided and verify_email wasn't -
@@ -94,6 +94,7 @@ class UsersService(AbstractService):
             update_data = data.model_dump(exclude_none=True)
             updated_user = await uow.users.update(obj=user, data=update_data)
 
+            await uow.commit()
             await self.clear_user_related_cache(user_id)
 
             return updated_user
@@ -102,6 +103,7 @@ class UsersService(AbstractService):
         """Delete a user by its id"""
         async with uow:
             await uow.users.delete(obj_id=user_id)
+            await uow.commit()
             await self.clear_user_related_cache(user_id)
 
     async def clear_user_related_cache(self, user_id: UUID4) -> None:

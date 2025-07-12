@@ -19,8 +19,7 @@ class CollectionsRepository(SQLAlchemyRepository):
             deck = CollectionDeck(collection_id=collection.id, id=deck_id)
             self.session.add(deck)
 
-        await self.session.commit()
-        await self.session.refresh(collection)
+        await self.session.flush()
 
         return collection
 
@@ -40,4 +39,3 @@ class CollectionDecksRepository(SQLAlchemyRepository):
         await self.session.execute(
             delete_(self.model).where(self.model.collection_id == collection_id)
         )
-        await self.session.commit()

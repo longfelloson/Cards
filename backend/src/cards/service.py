@@ -78,6 +78,7 @@ class CardsService(AbstractService):
 
             updated_card = await uow.cards.update(obj=card, data=update_data)
 
+            await uow.commit()
             await self.clear_card_related_cache(card_id)
 
             return updated_card
@@ -86,6 +87,7 @@ class CardsService(AbstractService):
         """Delete a card by its id"""
         async with uow:
             await uow.cards.delete(obj_id=card_id)
+            await uow.commit()
             await self.clear_card_related_cache(card_id)
 
     async def clear_card_related_cache(self, card_id: UUID4) -> None:

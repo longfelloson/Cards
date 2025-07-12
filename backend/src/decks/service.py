@@ -31,6 +31,7 @@ class DeckService(AbstractService):
 
             deck: Deck = await uow.decks.create(data=data, user_id=user_id)
 
+            await uow.commit()
             await self.clear_deck_related_cache(deck.id)
 
             return deck
@@ -80,6 +81,7 @@ class DeckService(AbstractService):
             update_data = data.model_dump(exclude_none=True)
             updated_deck: Deck = await uow.decks.update(obj=deck, data=update_data)
 
+            await uow.commit()
             await self.clear_deck_related_cache(deck.id)
 
             return updated_deck
@@ -88,6 +90,7 @@ class DeckService(AbstractService):
         """Delete a deck by its id"""
         async with uow:
             await uow.decks.delete(obj_id=deck_id)
+            await uow.commit()
             await self.clear_deck_related_cache(deck_id)
 
     async def clear_deck_related_cache(self, deck_id: UUID4) -> None:

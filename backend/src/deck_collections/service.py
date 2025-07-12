@@ -34,6 +34,7 @@ class CollectionService(AbstractService):
                 raise CollectionAlreadyExistsException()
             collection = await uow.collections.create(data=data, user_id=user_id)
 
+            await uow.commit()
             await self.clear_collection_related_cache(collection.id)
             
             return collection
@@ -92,6 +93,7 @@ class CollectionService(AbstractService):
         """Delete a collection by its id"""
         async with uow:
             await uow.collections.delete(obj_id=collection_id)
+            await uow.commit()
             await self.clear_collection_related_cache(collection_id)
 
     async def clear_collection_related_cache(self, collection_id: UUID4) -> None:

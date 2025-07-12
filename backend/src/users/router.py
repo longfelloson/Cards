@@ -22,7 +22,11 @@ async def create_user(data: UserCreate, uow: UOWDependency):
     return user
 
 
-@v1_router.get("/me", response_model=UserView, status_code=status.HTTP_200_OK)
+@v1_router.get(
+    "/me",
+    response_model=UserView,
+    status_code=status.HTTP_200_OK,
+)
 async def get_me(user: CurrentUserDependency):
     """Get the current user"""
     return user
@@ -40,7 +44,11 @@ async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
     return users
 
 
-@v1_router.get("/{user_id}", response_model=UserView, status_code=status.HTTP_200_OK)
+@v1_router.get(
+    "/{user_id}",
+    response_model=UserView,
+    status_code=status.HTTP_200_OK,
+)
 @cache(expire=DAY_TTL, namespace=Namespace.USER)
 async def get_user(user_id: UUID4, uow: UOWDependency):
     """Get a user by its id"""

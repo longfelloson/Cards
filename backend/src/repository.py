@@ -32,10 +32,9 @@ class SQLAlchemyRepository(AbstractRepository):
             create_data["user_id"] = user_id
 
         obj = self.model(**create_data)
-        self.session.add(obj)
 
+        self.session.add(obj)
         await self.session.flush()
-        await self.session.commit()
 
         return obj
 
@@ -61,16 +60,12 @@ class SQLAlchemyRepository(AbstractRepository):
                 setattr(obj, key, value)
 
         self.session.add(obj)
-
-        await self.session.commit()
-        await self.session.refresh(obj)
+        await self.session.flush()
 
         return obj
 
     async def delete_by_obj(self, *, obj):
         await self.session.delete(obj)
-        await self.session.commit()
 
     async def delete(self, obj_id: int | UUID4) -> None:
         await self.session.execute(delete(self.model).where(self.model.id == obj_id))
-        await self.session.commit()
