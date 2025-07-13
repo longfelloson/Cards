@@ -3,7 +3,10 @@ from typing import Annotated, Any, Literal
 from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from .logger import LoggingLevel
+
 DEFAULT_SMTP_HOST = "smtp.gmail.com"
+LOGGING_FILENAME = "logs.log"
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -20,6 +23,11 @@ class BaseConfig(BaseSettings):
         env_ignore_empty=True,
         extra="ignore",
     )
+    
+
+class LoggingConfig(BaseConfig):
+    LOGGING_FILENAME: str = LOGGING_FILENAME
+    LOGGING_LEVEL: LoggingLevel = LoggingLevel.WARNING
 
 
 class SMTPConfig(BaseConfig):
@@ -70,6 +78,7 @@ class Settings(BaseConfig):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     auth: AuthConfig = Field(default_factory=AuthConfig)
     redis: RedisConfig = Field(default_factory=RedisConfig)
+    logging: LoggingConfig = Field(default_factory=LoggingConfig)
 
     API_VERSION: int | float
 
