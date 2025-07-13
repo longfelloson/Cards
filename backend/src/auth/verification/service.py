@@ -6,12 +6,14 @@ from auth.verification.exceptions import (
     SameEmailException,
     SamePasswordException,
     TooManyVerificationsException,
+    VerificationEmailSendException,
 )
 from auth.verification.utils import (
     decode_verification_token,
     send_verification_link,
 )
-from emails.exceptions import EmailSendingFailedException
+from emails.exceptions import EmailSendException
+from logger import logger
 from pydantic import EmailStr
 from unit_of_work import UnitOfWork
 from users.models import User
@@ -71,11 +73,13 @@ class VerificationService:
         if new_email == user.email:
             raise SameEmailException()
 
+        email = new_email if new_email else user.email
+
         try:
-            email = new_email if new_email else user.email
             await send_verification_link(email, verification_token)
-        except Exception as e:
-            raise EmailSendingFailedException() from e
+        except EmailSendException:
+            logger.error(msg="Failed to send verification email", exc_info=True)
+            raise VerificationEmailSendException()
 
     async def confirm(self, *, token: str, uow: UnitOfWork) -> None:
         email = decode_verification_token(token=token)

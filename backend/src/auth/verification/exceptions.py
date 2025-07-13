@@ -1,3 +1,4 @@
+from typing import Dict, Optional
 from fastapi import HTTPException, status
 
 
@@ -85,3 +86,13 @@ class TooManyVerificationsException(HTTPException):
         headers=None,
     ):
         super().__init__(status_code, detail, headers)
+
+
+class VerificationEmailSendException(HTTPException):
+    def __init__(
+        self,
+        detail: str = "Failed to send verification email",
+        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+        headers: Optional[Dict[str, str]] = None,
+    ):
+        super().__init__(status_code=status_code, detail=detail, headers=headers)
