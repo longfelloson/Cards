@@ -98,7 +98,7 @@ class CollectionService(AbstractService):
 
     async def clear_collection_related_cache(self, collection_id: UUID4) -> None:
         await self.storage.clear_cache_by_keys(
-            self.cache_keys.collection(collection_id), self.cache_keys
+            self.cache_keys.collection(collection_id), self.cache_keys.collections()
         )
 
 
