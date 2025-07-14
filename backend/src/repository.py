@@ -67,5 +67,11 @@ class SQLAlchemyRepository(AbstractRepository):
     async def delete_by_obj(self, *, obj):
         await self.session.delete(obj)
 
-    async def delete(self, obj_id: int | UUID4) -> None:
-        await self.session.execute(delete(self.model).where(self.model.id == obj_id))
+    async def delete(
+        self, obj_id: int | UUID4, user_id: Optional[UUID4] = None
+    ) -> None:
+        stmt = delete(self.model).where(self.model.id == obj_id)
+        if user_id:
+            stmt = stmt.where(self.model.user_id == user_id)
+
+        await self.session.execute(stmt)
