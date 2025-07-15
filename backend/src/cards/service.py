@@ -51,12 +51,9 @@ class CardsService(AbstractService):
             card = await uow.cards.get_by(filter=filter)
             return card
 
-    async def get_all(
-        self, filter: CardsFilter, user_id: UUID4, uow: UnitOfWork
-    ) -> list[Card]:
+    async def get_all(self, filter: CardsFilter, uow: UnitOfWork) -> list[Card]:
         """Get cards by provided options"""
         async with uow:
-            filter.user_id = user_id
             cards = await uow.cards.get_all(filter=filter)
             return cards
 
@@ -96,4 +93,4 @@ class CardsService(AbstractService):
         )
 
 
-service = CardsService(storage=storage, cache_keys=Key)
+cards_service = CardsService(storage=storage, cache_keys=Key)

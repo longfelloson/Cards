@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, status
 from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
-from auth.dependencies import CurrentUserDependency, get_current_user
+from auth.dependencies import CurrentUserDependency
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
-from cards.service import service
+from cards.service import cards_service
 from dependencies import UOWDependency
 
 v1_router = APIRouter()
@@ -23,7 +23,7 @@ async def create_card(
     user: CurrentUserDependency,
 ):
     """Create a card with provided data"""
-    card = await service.create(data=data, user_id=user.id, uow=uow)
+    card = await cards_service.create(data=data, user_id=user.id, uow=uow)
     return card
 
 
@@ -33,13 +33,9 @@ async def create_card(
     status_code=status.HTTP_200_OK,
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.CARDS)
-async def get_cards(
-    uow: UOWDependency,
-    user: CurrentUserDependency,
-    filter: CardsFilter = Depends(),
-):
+async def get_cards(uow: UOWDependency, filter: CardsFilter = Depends()):
     """Get cards with provided conditions"""
-    cards = await service.get_all(filter=filter, uow=uow, user_id=user.id)
+    cards = await cards_service.get_all(filter=filter, uow=uow)
     return cards
 
 
@@ -47,12 +43,11 @@ async def get_cards(
     path="/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(get_current_user)],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.CARD)
 async def get_card(card_id: UUID4, uow: UOWDependency):
     """Get a card by its ID"""
-    card = await service.get(card_id=card_id, uow=uow)
+    card = await cards_service.get(card_id=card_id, uow=uow)
     return card
 
 
@@ -60,11 +55,10 @@ async def get_card(card_id: UUID4, uow: UOWDependency):
     "/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(get_current_user)],
 )
 async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     """Update a card with provided ID"""
-    card = await service.update(card_id=card_id, data=data, uow=uow)
+    card = await cards_service.update(card_id=card_id, data=data, uow=uow)
     return card
 
 
@@ -72,8 +66,7 @@ async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     path="/{card_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(get_current_user)],
 )
 async def delete_card(card_id: UUID4, uow: UOWDependency):
     """Delete a card by its id"""
-    await service.delete(card_id=card_id, uow=uow)
+    await cards_service.delete(card_id=card_id, uow=uow)
