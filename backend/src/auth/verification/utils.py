@@ -33,7 +33,7 @@ def decode_verification_token(*, token: Optional[str]) -> EmailStr:
 async def send_verification_link(email: EmailStr, token: str) -> None:
     message = EmailMessage()
 
-    message["From"] = settings.smtp.SMTP_EMAIL
+    message["From"] = settings.smtp.EMAIL
     message["To"] = email
     message["Subject"] = "Hello World!"
 

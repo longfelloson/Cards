@@ -4,19 +4,10 @@ import logging
 from config import settings
 
 
-class LoggingLevel(StrEnum):
-    INFO = "INFO"
-    DEBUG = "DEBUG"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    FATAL = "FATAL"
-    CRITICAL = "CRITICAL"
-    
-    
 logger = logging.Logger(__name__)
-logger.setLevel(lever=settings.logging.LOGGING_LEVEL)
+logger.setLevel(level=settings.logging.LEVEL)
 
-handler = logging.FileHandler(filename=settings.logging.LOGGING_FILENAME)
+handler = logging.FileHandler(filename=settings.logging.FILENAME)
 formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
 
 handler.setFormatter(formatter)

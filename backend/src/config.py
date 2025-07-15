@@ -1,14 +1,23 @@
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .logger import LoggingLevel
+SMTP_DEFAULT_HOST = "smtp.gmail.com"
+LOGGING_DEFAULT_FILENAME = "logs.log"
+REDIS_DEFAULT_PREFIX = "cache"
 
-DEFAULT_SMTP_HOST = "smtp.gmail.com"
-LOGGING_FILENAME = "logs.log"
 
-
+class LoggingLevel(StrEnum):
+    INFO = "INFO"
+    DEBUG = "DEBUG"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    FATAL = "FATAL"
+    CRITICAL = "CRITICAL"
+    
+    
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
@@ -23,33 +32,41 @@ class BaseConfig(BaseSettings):
         env_ignore_empty=True,
         extra="ignore",
     )
-    
+
 
 class LoggingConfig(BaseConfig):
-    LOGGING_FILENAME: str = LOGGING_FILENAME
-    LOGGING_LEVEL: LoggingLevel = LoggingLevel.WARNING
+    model_config = SettingsConfigDict(env_prefix="LOGGING_")
+    
+    FILENAME: str = LOGGING_DEFAULT_FILENAME
+    LEVEL: LoggingLevel = LoggingLevel.WARNING
 
 
 class SMTPConfig(BaseConfig):
-    SMTP_PORT: int
-    SMTP_HOST: str = DEFAULT_SMTP_HOST
-    SMTP_PASSWORD: SecretStr
-    SMTP_EMAIL: EmailStr
+    model_config = SettingsConfigDict(env_prefix="SMTP_")
+    
+    PORT: int
+    HOST: str = SMTP_DEFAULT_HOST
+    PASSWORD: SecretStr
+    EMAIL: EmailStr
 
 
 class DatabaseConfig(BaseConfig):
-    DB_PORT: int
-    DB_HOST: str
-    DB_NAME: str
-    DB_PASSWORD: SecretStr
-    DB_USER: str
+    model_config = SettingsConfigDict(env_prefix="DB_")
+    
+    PORT: int
+    HOST: str
+    NAME: str
+    PASSWORD: SecretStr
+    USER: str
 
     @property
-    def db_url(self):
-        DB_PASSWORD = self.DB_PASSWORD.get_secret_value()
-        return (
-            f"postgresql+asyncpg://{self.DB_USER}:{DB_PASSWORD}@"
-            f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    def url(self) -> str:
+        return "postgresql+asyncpg://{}:{}@{}:{}/{}".format(
+            self.USER,
+            self.PASSWORD.get_secret_value(),
+            self.HOST,
+            self.PORT,
+            self.NAME,
         )
 
 
@@ -65,12 +82,16 @@ class RedisConfig(BaseConfig):
     PORT: int = 6379
     DB: int = 0
     PASSWORD: SecretStr
-    DB_PREFIX: str = "cache"
+    DB_PREFIX: str = REDIS_DEFAULT_PREFIX
 
     @property
     def url(self):
-        password = self.PASSWORD.get_secret_value()
-        return f"redis://:{password}@{self.HOST}:{self.PORT}/{self.DB}"
+        return "redis://:{}@{}:{}/{}".format(
+            self.PASSWORD.get_secret_value(),
+            self.HOST,
+            self.PORT,
+            self.DB,
+        )   
 
 
 class Settings(BaseConfig):
