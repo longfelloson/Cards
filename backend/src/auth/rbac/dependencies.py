@@ -18,8 +18,9 @@ async def check_permissions(
     path_user_id = request.path_params.get(USER_ID_KEY)
     query_user_id = request.query_params.get(USER_ID_KEY)
 
-    if not (path_user_id == current_user_id or query_user_id == current_user_id):
-        raise AccessDeniedException()
+    if path_user_id or current_user_id:
+        if not (path_user_id == current_user_id or query_user_id == current_user_id):
+            raise AccessDeniedException()
 
     resource = get_request_resource(request.url.path)
     action = request.method.casefold()
