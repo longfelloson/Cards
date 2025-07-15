@@ -16,8 +16,8 @@ class LoggingLevel(StrEnum):
     ERROR = "ERROR"
     FATAL = "FATAL"
     CRITICAL = "CRITICAL"
-    
-    
+
+
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
@@ -36,23 +36,33 @@ class BaseConfig(BaseSettings):
 
 class LoggingConfig(BaseConfig):
     model_config = SettingsConfigDict(env_prefix="LOGGING_")
-    
+
     FILENAME: str = LOGGING_DEFAULT_FILENAME
     LEVEL: LoggingLevel = LoggingLevel.WARNING
 
 
 class SMTPConfig(BaseConfig):
     model_config = SettingsConfigDict(env_prefix="SMTP_")
-    
+
     PORT: int
     HOST: str = SMTP_DEFAULT_HOST
     PASSWORD: SecretStr
     EMAIL: EmailStr
+    
+    @property
+    def send_email_kwargs(self) -> dict:
+        return {
+            "hostname": self.HOST,
+            "port": self.PORT,
+            "start_tls": True,
+            "username": self.EMAIL,
+            "password": self.PASSWORD.get_secret_value()
+        }
 
 
 class DatabaseConfig(BaseConfig):
     model_config = SettingsConfigDict(env_prefix="DB_")
-    
+
     PORT: int
     HOST: str
     NAME: str
@@ -91,7 +101,7 @@ class RedisConfig(BaseConfig):
             self.HOST,
             self.PORT,
             self.DB,
-        )   
+        )
 
 
 class Settings(BaseConfig):
