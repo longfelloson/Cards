@@ -1,11 +1,14 @@
+from fastapi import Request
+
 from auth.rbac.enforce import ENFORCER
-from auth.rbac.enums import Action, Resource
-from users.models import User
 from config import settings
 
 
-def has_access_to_resource(user: User, resource: Resource, action: Action) -> bool:
-    if ENFORCER.enforce(user.role, resource, action):
+def has_access_to_resource(request: Request) -> bool:
+    resource = get_request_resource(request.url.path)
+    action = request.method.casefold()
+    
+    if ENFORCER.enforce(request.user.role, resource, action):
         return True
     return False
 
