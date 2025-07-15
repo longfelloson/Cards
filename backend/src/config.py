@@ -48,7 +48,7 @@ class SMTPConfig(BaseConfig):
     HOST: str = SMTP_DEFAULT_HOST
     PASSWORD: SecretStr
     EMAIL: EmailStr
-    
+
     @property
     def send_email_kwargs(self) -> dict:
         return {
@@ -56,7 +56,7 @@ class SMTPConfig(BaseConfig):
             "port": self.PORT,
             "start_tls": True,
             "username": self.EMAIL,
-            "password": self.PASSWORD.get_secret_value()
+            "password": self.PASSWORD.get_secret_value(),
         }
 
 

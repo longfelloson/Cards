@@ -18,19 +18,18 @@ class TestUsersService:
 
     async def test_get(self, create_user: User, uow: UnitOfWork):
         user = await users_service.get(user_id=create_user.id, uow=uow)
-        
+
         assert isinstance(user, User)
         assert user.id == create_user.id
-    
+
     async def test_update(self, create_user: User, data: UserUpdate, uow: UnitOfWork):
         updated_user = await users_service.update(user_id=create_user, data=data)
-        
+
         for attr in data.model_dump().keys():
             if hasattr(updated_user, attr):
                 value = getattr(create_user)
                 assert value == data[attr]
-        
+
     async def test_delete(self):
         # TODO: tests for test delete
         ...
-        

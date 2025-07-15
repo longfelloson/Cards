@@ -1,4 +1,3 @@
-from enum import StrEnum
 import logging
 
 from config import settings

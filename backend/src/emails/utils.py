@@ -13,4 +13,4 @@ async def send_email(message: EmailMessage) -> None:
     except aiosmtplib.SMTPException as e:
         logger.error(msg="Error while sending a message via email", exc_info=True)
         raise EmailSendException() from e
-    
+        
