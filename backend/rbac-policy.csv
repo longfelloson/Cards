@@ -13,12 +13,13 @@ p, user, decks/:id, delete
 p, user, cards, post
 p, user, cards, get
 p, user, cards/:id, get
+p, user, cards/:id, patch
 p, user, cards/:id, delete
 
 p, user, collections, post
 p, user, collections, get
 p, user, collections/:id, get
 p, user, collections/:id, patch
-p, user, collections/:id delete
+p, user, collections/:id, delete
 
 g, admin, user
