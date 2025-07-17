@@ -5,7 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
+from starlette.middleware.authentication import AuthenticationMiddleware
 from api import api_v1_router
+from auth.middlewares import AuthMiddleware
 from cache.utils import request_key_builder
 from cache.redis import redis_client
 from database import db
@@ -14,12 +16,14 @@ from config import settings
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await db.create_tables()
+
     FastAPICache.init(
         backend=RedisBackend(redis_client),
         prefix=settings.redis.DB_PREFIX,
         key_builder=request_key_builder,
     )
-    await db.create_tables()
+
     yield
 
 
@@ -42,4 +46,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.add_middleware(
+    AuthenticationMiddleware,
+    backend=AuthMiddleware(),
+    on_error=AuthMiddleware.auth_exception_handler,
 )
