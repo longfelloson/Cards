@@ -1,11 +1,6 @@
-from fastapi import HTTPException, status
+from exceptions import NotFoundException
 
 
-class AccessDeniedException(HTTPException):
-    def __init__(
-        self,
-        status_code: int = status.HTTP_404_NOT_FOUND,
-        detail: str = "Resource doesn't exist",
-        headers=None,
-    ):
-        super().__init__(status_code, detail, headers)
+class ResourceNotFound(NotFoundException):
+    def __init__(self):
+        super().__init__(object_name="resource")
