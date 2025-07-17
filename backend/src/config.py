@@ -5,7 +5,7 @@ from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, comput
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 SMTP_DEFAULT_HOST = "smtp.gmail.com"
-LOGGING_DEFAULT_FILENAME = "logs.log"
+LOGGING_DEFAULT_FILENAME = "../logs.log"
 REDIS_DEFAULT_PREFIX = "cache"
 
 
