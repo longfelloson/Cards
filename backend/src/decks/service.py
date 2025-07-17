@@ -100,4 +100,4 @@ class DeckService(AbstractService):
         )
 
 
-service = DeckService(storage=storage, cache_keys=Key)
+decks_service = DeckService(storage=storage, cache_keys=Key)
