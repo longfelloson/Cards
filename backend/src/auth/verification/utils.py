@@ -2,15 +2,16 @@ from email.message import EmailMessage
 from typing import Optional
 from urllib.parse import urlencode
 
+from jwt import InvalidTokenError
 from pydantic import EmailStr, HttpUrl
 
-from auth.exceptions import ExpiredTokenException, InvalidTokenException
 from auth.token import decode_token
 from auth.verification.exceptions import (
     ExpiredLinkException,
     InvalidLinkException,
     MissingVerificationTokenException,
 )
+from auth.exceptions import ExpiredTokenError
 from config import settings
 from emails.utils import send_email
 
@@ -22,9 +23,9 @@ def decode_verification_token(*, token: Optional[str]) -> EmailStr:
 
     try:
         new_email = decode_token(token)["email"]
-    except ExpiredTokenException:
+    except ExpiredTokenError:
         raise ExpiredLinkException()
-    except InvalidTokenException:
+    except InvalidTokenError:
         raise InvalidLinkException()
 
     return new_email

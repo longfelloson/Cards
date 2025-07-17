@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import jwt
-from auth.exceptions import ExpiredTokenException, InvalidTokenException
+from auth.exceptions import ExpiredTokenError, InvalidTokenError
 from config import settings
 from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.api_prefix}/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.token_url)
 
 
 def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -35,6 +35,6 @@ def decode_token(token: str) -> dict:
         )
         return payload
     except jwt.ExpiredSignatureError:
-        raise ExpiredTokenException()
+        raise ExpiredTokenError()
     except jwt.InvalidTokenError:
-        raise InvalidTokenException()
+        raise InvalidTokenError()
