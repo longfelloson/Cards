@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
-from auth.dependencies import CurrentUserDependency
+from auth.dependencies import PermissionsDependency
+from cards.permissions import CardOwnerPermission
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
@@ -18,12 +19,12 @@ v1_router = APIRouter()
     response_model=CardView,
 )
 async def create_card(
+    request: Request,
     data: CardCreate,
     uow: UOWDependency,
-    user: CurrentUserDependency,
 ):
     """Create a card with provided data"""
-    card = await cards_service.create(data=data, user_id=user.id, uow=uow)
+    card = await cards_service.create(data=data, user_id=request.user.id, uow=uow)
     return card
 
 
@@ -55,6 +56,7 @@ async def get_card(card_id: UUID4, uow: UOWDependency):
     "/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(CardOwnerPermission))],
 )
 async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     """Update a card with provided ID"""
@@ -66,6 +68,7 @@ async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     path="/{card_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(PermissionsDependency(CardOwnerPermission))],
 )
 async def delete_card(card_id: UUID4, uow: UOWDependency):
     """Delete a card by its id"""
