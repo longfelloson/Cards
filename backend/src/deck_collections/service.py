@@ -83,8 +83,6 @@ class CollectionService(AbstractService):
                 )
 
             await uow.commit()
-            await uow.session.refresh(updated_collection)
-
             await self.clear_collection_related_cache(collection_id)
 
             return updated_collection
