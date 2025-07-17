@@ -20,7 +20,7 @@ class Storage:
 
     async def clear_cache_by_keys(self, *keys: Sequence[Key]) -> None:
         for key in keys:
-            await self.clear_cache(key=key)
+            await self.clear_cache_by_key(key=key)
 
 
 storage = Storage(client=redis_client, keys=Key)
