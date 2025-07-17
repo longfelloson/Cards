@@ -1,4 +1,3 @@
-from fastapi import Response
 from auth.exceptions import InvalidCredentialsError
 from auth.password import verify_password
 from auth.schemas import AccessToken
