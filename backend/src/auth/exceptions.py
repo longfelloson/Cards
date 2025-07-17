@@ -1,31 +1,39 @@
+from typing import Any
+
 from fastapi import HTTPException, status
 
+INVALID_CREDENTIALS_DETAIL = "Incorrect username or password"
+TOKEN_ERROR_DETAIL = "Not authenticated"
+TOKEN_EXPIRED_DETAIL = "Token expired"
+INVALID_TOKEN_DETAIL = "Invalid token"
 
-class InvalidCredentialsException(HTTPException):
+DEFAULT_AUTH_HEADER = {"WWW-Authenticate": "Bearer"}
+
+
+class TokenError(HTTPException):
     def __init__(
         self,
-        status_code: int = status.HTTP_401_UNAUTHORIZED,
-        detail: str = "Incorrect username or password",
-        headers: dict = {"WWW-Authenticate": "Bearer"},
-    ):
-        super().__init__(status_code, detail, headers)
+        *,
+        detail: str = TOKEN_ERROR_DETAIL,
+        headers: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=detail,
+            headers=headers or DEFAULT_AUTH_HEADER,
+        )
 
 
-class ExpiredTokenException(HTTPException):
-    def __init__(
-        self,
-        status_code: int = status.HTTP_401_UNAUTHORIZED,
-        detail: str = "Token expired",
-        headers=None,
-    ):
-        super().__init__(status_code, detail, headers)
+class InvalidCredentialsError(TokenError):
+    def __init__(self) -> None:
+        super().__init__(detail=INVALID_CREDENTIALS_DETAIL)
 
 
-class InvalidTokenException(HTTPException):
-    def __init__(
-        self,
-        status_code: int = status.HTTP_401_UNAUTHORIZED,
-        detail: str = "Invalid token",
-        headers=None,
-    ):
-        super().__init__(status_code, detail, headers)
+class ExpiredTokenError(TokenError):
+    def __init__(self) -> None:
+        super().__init__(detail=TOKEN_EXPIRED_DETAIL)
+
+
+class InvalidTokenError(TokenError):
+    def __init__(self) -> None:
+        super().__init__(detail=INVALID_TOKEN_DETAIL)
