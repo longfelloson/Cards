@@ -18,7 +18,7 @@ from service import AbstractService
 from unit_of_work import UnitOfWork
 
 
-class CollectionService(AbstractService):
+class CollectionsService(AbstractService):
     def __init__(self, *, storage, cache_keys):
         self.storage = storage
         self.cache_keys = cache_keys
@@ -36,7 +36,7 @@ class CollectionService(AbstractService):
 
             await uow.commit()
             await self.clear_collection_related_cache(collection.id)
-            
+
             return collection
 
     async def get(self, *, collection_id: UUID4, uow: UnitOfWork) -> Collection:
@@ -100,4 +100,4 @@ class CollectionService(AbstractService):
         )
 
 
-service = CollectionService(storage=storage, cache_keys=Key)
+collections_service = CollectionsService(storage=storage, cache_keys=Key)
