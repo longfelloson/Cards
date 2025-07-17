@@ -137,5 +137,19 @@ class Settings(BaseConfig):
     def api_prefix(self) -> str:
         return f"/api/v{self.API_VERSION}"
 
+    @property
+    def token_url(self) -> str:
+        return f"{settings.api_prefix}/auth/token"
+
+    @property
+    def unprotected_paths(self) -> list[str]:
+        return [
+            f"{self.API_VERSION}/auth/login",
+            f"{self.API_VERSION}/auth/logout",
+            "/docs",
+            "/openapi.json",
+            self.token_url,
+        ]
+
 
 settings = Settings()
