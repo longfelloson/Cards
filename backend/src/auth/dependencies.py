@@ -20,4 +20,14 @@ async def get_current_user(
     return user
 
 
+class PermissionsDependency:
+    def __init__(self, *permission_classes: Sequence[type[BasePermission]]):
+        self.permission_classes = permission_classes
+
+    async def __call__(self, request: Request):
+        for permission_class in self.permission_classes:
+            permission_instance = permission_class()
+            await permission_instance(request)
+
+
 CurrentUserDependency = Annotated[User, Depends(get_current_user)]
