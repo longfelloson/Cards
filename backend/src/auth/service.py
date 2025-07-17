@@ -1,4 +1,5 @@
-from auth.exceptions import InvalidCredentialsException
+from fastapi import Response
+from auth.exceptions import InvalidCredentialsError
 from auth.password import verify_password
 from auth.schemas import AccessToken
 from auth.token import create_token
@@ -18,10 +19,10 @@ class AuthService:
         user_filter = UserFilter(email=credentials.email)
         user = await users_service.get_by(filter=user_filter, uow=uow)
         if not user:
-            raise InvalidCredentialsException()
+            raise InvalidCredentialsError()
 
         if not verify_password(credentials.password, user.password):
-            raise InvalidCredentialsException()
+            raise InvalidCredentialsError()
 
         access_token = create_token(data={"sub": user.email})
         return AccessToken(access_token=access_token)
