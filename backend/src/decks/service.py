@@ -78,6 +78,10 @@ class DeckService(AbstractService):
         """Update a deck by its ID with the provided data."""
         async with uow:
             deck = await self.get(deck_id=deck_id, uow=uow)
+
+            if not data.are_new_column_values_provided(deck):
+                return deck
+
             update_data = data.model_dump(exclude_none=True)
             updated_deck: Deck = await uow.decks.update(obj=deck, data=update_data)
 
