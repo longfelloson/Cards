@@ -1,4 +1,5 @@
-from auth.dependencies import CurrentUserDependency
+from auth.dependencies import CurrentUserDependency, PermissionsDependency
+from users.permissions import UserViewPermission
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from dependencies import UOWDependency
@@ -48,6 +49,7 @@ async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
     "/{user_id}",
     response_model=UserView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(UserViewPermission))],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.USER)
 async def get_user(user_id: UUID4, uow: UOWDependency):
@@ -60,6 +62,7 @@ async def get_user(user_id: UUID4, uow: UOWDependency):
     "/{user_id}",
     response_model=UserView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(UserViewPermission))],
 )
 async def update_user(
     user_id: UUID4,
@@ -75,6 +78,7 @@ async def update_user(
     "/{user_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(PermissionsDependency(UserViewPermission))],
 )
 async def delete_user(user_id: UUID4, uow: UOWDependency):
     """Delete a user by its id"""
