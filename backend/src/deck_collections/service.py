@@ -29,10 +29,13 @@ class CollectionsService(AbstractService):
         """Create a collection with provided data"""
         async with uow:
             collection_filter = CollectionFilter(name=data.name)
-            collection = await self.get_by(filter=collection_filter)
+            collection = await self.get_by(filter=collection_filter, uow=uow)
+
             if collection:
                 raise CollectionAlreadyExistsException()
+
             collection = await uow.collections.create(data=data, user_id=user_id)
+            await uow.collection_decks.create(collection.id, data.deck_ids)
 
             await uow.commit()
             await self.clear_collection_related_cache(collection.id)

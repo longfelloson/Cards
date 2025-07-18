@@ -1,22 +1,22 @@
 from datetime import datetime
 from typing import Optional
 
-from deck_collections.models import Collection
-from decks.schemas import DeckView
 from pydantic import UUID4, BaseModel
+
+from deck_collections.models import Collection
 from schemas import BaseFilter, BaseUpdate
 
 
 class CollectionCreate(BaseModel):
     name: str
-    decks_ids: list[UUID4]
+    deck_ids: list[UUID4]
 
 
 class CollectionView(BaseModel):
     id: UUID4
     name: str
     created_at: datetime
-    decks: list[DeckView]
+    user_id: UUID4
 
 
 class CollectionUpdate(BaseUpdate):
