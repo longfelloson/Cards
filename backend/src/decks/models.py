@@ -14,8 +14,5 @@ class Deck(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now)
 
-    collection_decks = relationship(
-        "CollectionDeck", back_populates="deck", overlaps="decks"
-    )
     user = relationship("User", back_populates="decks")
     cards = relationship("Card", back_populates="deck", cascade="all, delete-orphan")
