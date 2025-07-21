@@ -49,15 +49,8 @@ class DeckService(AbstractService):
                 raise DeckNotFoundException()
             return deck
 
-    async def get_all(
-        self,
-        *,
-        filter: DecksFilter,
-        user_id: UUID4,
-        uow: UnitOfWork,
-    ) -> List[Deck]:
+    async def get_all(self, *, filter: DecksFilter, uow: UnitOfWork) -> List[Deck]:
         """Get all decks with provided conditions"""
-        filter.user_id = user_id
         async with uow:
             decks = await uow.decks.get_all(filter=filter)
             return decks
