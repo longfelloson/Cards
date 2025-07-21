@@ -38,15 +38,6 @@ class BasePermission(ABC):
         raise NotImplementedError()
         
 
-class AdminPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        if request.user.role == Role.ADMIN:
-            return True
-        
-        has_access = has_access_to_resource(request, request.user)
-        return has_access
-    
-
 @dataclass
 class OwnerPermission(BasePermission):
     instance: object

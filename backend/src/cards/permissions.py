@@ -3,7 +3,6 @@ from fastapi import Request
 from auth.permissions import (
     BasePermission,
     OwnerPermission,
-    RolePermission,
     any_permission,
 )
 from cards.service import cards_service
@@ -28,7 +27,6 @@ class CardViewPermission(BasePermission):
         has_permission = await any_permission(
             permissions=[
                 OwnerPermission(instance=card),
-                AdminPermission(),
             ],
             request=request,
         )
