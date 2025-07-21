@@ -1,5 +1,6 @@
 import uuid
 
+from enums import Visibility
 from database import Base
 from sqlalchemy import UUID, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -30,7 +31,8 @@ class Card(Base):
     reviews_amount = Column(Integer, nullable=False, default=0)
     ease_factor = Column(Float, nullable=False, default=2.5)
     repetition_interval = Column(Integer, nullable=False, default=1)
-    last_reviewed_at = Column(DateTime, nullable=True, onupdate=func.now())
-
+    last_reviewed_at = Column(DateTime, nullable=True)
+    visibility = Column(String(16), nullable=False, default=Visibility.hidden)
+    
     user = relationship("User", back_populates="cards")
     deck = relationship("Deck", back_populates="cards")
