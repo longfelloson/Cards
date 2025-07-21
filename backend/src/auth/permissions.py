@@ -4,8 +4,6 @@ from dataclasses import dataclass
 from fastapi import HTTPException, Request
 
 from auth.rbac.exceptions import ResourceNotFound
-from auth.rbac.enums import Role
-from auth.rbac.utils import has_access_to_resource
 
 
 async def all_permissions(permissions: list, request: Request) -> bool:
