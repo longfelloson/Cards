@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from backend.enums import Visibility
+from enums import Visibility
 from cards.models import Card
 from cards.enums import MemorizationLevel
 from pydantic import UUID4, BaseModel, ConfigDict

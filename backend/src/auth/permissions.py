@@ -5,7 +5,7 @@ from fastapi import HTTPException, Request
 
 from auth.rbac.exceptions import ResourceNotFound
 from auth.rbac.enums import Role
-from backend.enums import Visibility
+from enums import Visibility
 
 
 async def all_permissions(permissions: list, request: Request) -> bool:
