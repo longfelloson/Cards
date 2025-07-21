@@ -1,4 +1,4 @@
-from typing import Annotated, Sequence
+from typing import Annotated
 
 from auth.exceptions import InvalidTokenError
 from auth.utils import get_user_from_token
@@ -19,10 +19,10 @@ async def get_current_user(
 
 
 class PermissionsDependency:
-    def __init__(self, *permission_classes: Sequence[type[BasePermission]]):
+    def __init__(self, *permission_classes: type[BasePermission]):
         self.permission_classes = permission_classes
 
-    async def __call__(self, request: Request):        
+    async def __call__(self, request: Request):
         for permission_class in self.permission_classes:
             permission_instance = permission_class()
             await permission_instance(request)
