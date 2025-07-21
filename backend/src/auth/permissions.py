@@ -51,6 +51,29 @@ class OwnerPermission(BasePermission):
 
 class UserMatchPermission(BasePermission):
     async def has_required_permissions(self, request):
-        user_id = request.query_params.get('user_id')
+        user_id = request.query_params.get("user_id")
         return user_id and user_id == request.user.id
-        
+
+
+@dataclass
+class VisibilityPermission(BasePermission):
+    required_visibility: Visibility = Visibility.visible
+    instance: object = None
+
+    async def has_required_permissions(self, request: Request) -> bool:
+        """
+        Check if user requests either his own resource or required visibility
+        """
+        provided_visibility = request.query_params.get("visibility")
+
+        if self.instance:
+            if not hasattr(self.instance, "visibility"):
+                raise AttributeError(
+                    f"{self.instance} must have the visibility attribute!"
+                )
+            return self.instance.visibility == self.required_visibility
+
+        if not provided_visibility:
+            return True
+
+        return provided_visibility == self.required_visibility
