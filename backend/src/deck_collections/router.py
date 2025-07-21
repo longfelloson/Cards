@@ -48,17 +48,9 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     status_code=status.HTTP_200_OK,
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.COLLECTIONS)
-async def get_collections(
-    request: Request,
-    uow: UOWDependency,
-    filter: CollectionsFilter = Depends(),
-):
+async def get_collections(uow: UOWDependency, filter: CollectionsFilter = Depends()):
     """Get collections by provided conditions"""
-    collections = await collections_service.get_all(
-        filter=filter,
-        uow=uow,
-        user_id=request.user.id,
-    )
+    collections = await collections_service.get_all(filter=filter, uow=uow)
     return collections
 
 

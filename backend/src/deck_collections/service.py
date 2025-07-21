@@ -59,10 +59,12 @@ class CollectionsService(AbstractService):
             return collection
 
     async def get_all(
-        self, *, filter: CollectionsFilter, user_id: UUID4, uow: UnitOfWork
+        self,
+        *,
+        filter: CollectionsFilter,
+        uow: UnitOfWork,
     ) -> list[Collection]:
         """Get collections by provided conditions"""
-        filter.user_id = user_id
         async with uow:
             collections = await uow.collections.get_all(filter=filter)
             return collections
