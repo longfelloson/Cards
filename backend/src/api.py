@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from auth.router import router as auth_router
+from auth.rbac.dependencies import AccessDependency
 from cards.router import v1_router as v1_cards_router
 from deck_collections.router import v1_router as v1_collections_router
 from decks.router import v1_router as v1_decks_router
@@ -13,22 +14,26 @@ api_v1_router.include_router(
     v1_cards_router,
     prefix="/cards",
     tags=["Cards"],
+    dependencies=[Depends(AccessDependency())],
 )
 
 api_v1_router.include_router(
     v1_decks_router,
     prefix="/decks",
     tags=["Decks"],
+    dependencies=[Depends(AccessDependency())],
 )
 
 api_v1_router.include_router(
     v1_users_router,
     prefix="/users",
     tags=["Users"],
+    dependencies=[Depends(AccessDependency())],
 )
 
 api_v1_router.include_router(
     v1_collections_router,
     prefix="/collections",
     tags=["Collections"],
+    dependencies=[Depends(AccessDependency())],
 )
