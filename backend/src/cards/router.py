@@ -3,7 +3,7 @@ from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
 from auth.dependencies import PermissionsDependency
-from cards.permissions import CardOwnerPermission
+from cards.permissions import CardOwnerPermission, CardViewPermission, CardsViewPermission
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
@@ -32,6 +32,7 @@ async def create_card(
     path="",
     response_model=list[CardView],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(CardsViewPermission))],
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.CARDS)
 async def get_cards(uow: UOWDependency, filter: CardsFilter = Depends()):
@@ -44,6 +45,7 @@ async def get_cards(uow: UOWDependency, filter: CardsFilter = Depends()):
     path="/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(CardViewPermission))],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.CARD)
 async def get_card(card_id: UUID4, uow: UOWDependency):
