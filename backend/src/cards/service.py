@@ -31,6 +31,7 @@ class CardsService(AbstractService):
                 raise CardAlreadyExistsException()
             card = await uow.cards.create(data=data, user_id=user_id)
 
+            await uow.commit()
             await self.clear_card_related_cache(card.id)
 
             return card
