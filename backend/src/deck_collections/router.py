@@ -1,5 +1,4 @@
 from auth.dependencies import PermissionsDependency
-from auth.rbac.dependencies import RoleAccessDependency
 from deck_collections.permissions import CollectionOwnerPermission
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
@@ -15,7 +14,7 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
-v1_router = APIRouter(dependencies=[Depends(RoleAccessDependency)])
+v1_router = APIRouter()
 
 
 @v1_router.post("", response_model=CollectionView, status_code=status.HTTP_201_CREATED)
