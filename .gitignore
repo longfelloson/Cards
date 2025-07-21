@@ -43,3 +43,5 @@ volumes/
 
 # Other
 TODO
+
+.ruff_cache/
