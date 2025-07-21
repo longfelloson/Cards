@@ -27,6 +27,7 @@ class CardViewPermission(BasePermission):
         has_permission = await any_permission(
             permissions=[
                 OwnerPermission(instance=card),
+                VisibilityPermission(instance=card)
             ],
             request=request,
         )
