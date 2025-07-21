@@ -7,4 +7,3 @@ class AccessDependency:
     async def __call__(self, request: Request):
         if not has_access_to_resource(request):
             raise ResourceNotFound()
-            

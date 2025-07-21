@@ -3,7 +3,11 @@ from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
 from auth.dependencies import PermissionsDependency
-from cards.permissions import CardOwnerPermission, CardViewPermission, CardsViewPermission
+from cards.permissions import (
+    CardOwnerPermission,
+    CardViewPermission,
+    CardsViewPermission,
+)
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
