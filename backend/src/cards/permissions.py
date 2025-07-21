@@ -3,6 +3,8 @@ from fastapi import Request
 from auth.permissions import (
     BasePermission,
     OwnerPermission,
+    UserMatchPermission,
+    VisibilityPermission,
     any_permission,
 )
 from cards.service import cards_service
@@ -37,10 +39,13 @@ class CardViewPermission(BasePermission):
 class CardsViewPermission(BasePermission):
     async def has_required_permissions(self, request: Request) -> bool:
         """
-        Check if user is admin or owns cards
+        Check if user requires its own cards or not hidden cards
         """
-        user_id = request.query_params.get("user_id")
-        if not user_id:
-            return True
-
-        return user_id == request.user.id
+        has_permission = await any_permission(
+            permissions=[
+                UserMatchPermission(),
+                VisibilityPermission(),
+            ],
+            request=request,
+        )
+        return has_permission
