@@ -36,9 +36,9 @@ class BasePermission(ABC):
     @abstractmethod
     async def has_required_permissions(self, request: Request) -> bool:
         raise NotImplementedError()
+        
 
-
-class RolePermission(BasePermission):
+class AdminPermission(BasePermission):
     async def has_required_permissions(self, request: Request) -> bool:
         if request.user.role == Role.ADMIN:
             return True
