@@ -5,6 +5,7 @@ from fastapi import HTTPException, Request
 
 from auth.rbac.exceptions import ResourceNotFound
 from auth.rbac.enums import Role
+from backend.enums import Visibility
 
 
 async def all_permissions(permissions: list, request: Request) -> bool:
@@ -46,3 +47,10 @@ class OwnerPermission(BasePermission):
 
     async def has_required_permissions(self, request: Request) -> bool:
         return self.instance.user_id == request.user.id
+
+
+class UserMatchPermission(BasePermission):
+    async def has_required_permissions(self, request):
+        user_id = request.query_params.get('user_id')
+        return user_id and user_id == request.user.id
+        
