@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from backend.enums import Visibility
 from cards.models import Card
 from cards.enums import MemorizationLevel
 from pydantic import UUID4, BaseModel, ConfigDict
@@ -26,6 +27,7 @@ class CardView(BaseModel):
     ease_factor: float
     repetition_interval: int
     last_reviewed_at: Optional[datetime]
+    visibility: Visibility
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,6 +39,7 @@ class CardUpdate(BaseUpdate):
     face: Optional[str] = None
     turnover: Optional[str] = None
     last_memorization_level: Optional[MemorizationLevel] = None
+    visibility: Optional[Visibility] = None
 
 
 class CardFilter(BaseFilter):
@@ -49,6 +52,7 @@ class CardsFilter(BaseFilter):
     deck_id: Optional[UUID4] = None
     to_study: Optional[bool] = None
     user_id: Optional[UUID4] = None
+    visibility: Optional[Visibility] = None
 
 
 class CardReview(BaseModel):
