@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from fastapi import HTTPException, Request
 
 from auth.rbac.exceptions import ResourceNotFound
+from auth.rbac.enums import Role
+from auth.rbac.utils import has_access_to_resource
 
 
 def any_permission(permissions: list, request: Request) -> bool:
@@ -23,3 +25,13 @@ class BasePermission(ABC):
     @abstractmethod
     async def has_required_permissions(self, request: Request) -> bool:
         raise NotImplementedError()
+
+
+class RolePermission(BasePermission):
+    async def has_required_permissions(self, request: Request) -> bool:
+        if request.user.role == Role.ADMIN:
+            return True
+        
+        has_access = has_access_to_resource(request, request.user)
+        return has_access
+    
