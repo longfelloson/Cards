@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import UUID4, BaseModel
 
+from enums import Visibility
 from deck_collections.models import Collection
 from schemas import BaseFilter, BaseUpdate
 
@@ -17,6 +18,7 @@ class CollectionView(BaseModel):
     name: str
     created_at: datetime
     user_id: UUID4
+    visibility: Visibility
 
 
 class CollectionUpdate(BaseUpdate):
@@ -25,6 +27,7 @@ class CollectionUpdate(BaseUpdate):
 
     name: Optional[str] = None
     decks_ids: Optional[list[UUID4]] = None
+    visibility: Optional[Visibility] = None
 
 
 class CollectionFilter(BaseFilter):
@@ -33,3 +36,4 @@ class CollectionFilter(BaseFilter):
 
 class CollectionsFilter(BaseFilter):
     user_id: Optional[UUID4] = None
+    visibility: Optional[Visibility] = None
