@@ -33,3 +33,16 @@ class CardViewPermission(BasePermission):
             request=request,
         )
         return has_permission
+
+
+class CardsViewPermission(BasePermission):
+    async def has_required_permissions(self, request: Request) -> bool:
+        """
+        Check if user is admin or owns cards
+        """
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return True
+
+        return user_id == request.user.id
+    
