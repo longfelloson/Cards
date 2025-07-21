@@ -8,14 +8,24 @@ from auth.rbac.enums import Role
 from auth.rbac.utils import has_access_to_resource
 
 
-def any_permission(permissions: list, request: Request) -> bool:
-    for p in permissions:
+async def all_permissions(permissions: list, request: Request) -> bool:
+    for permission in permissions:
         try:
-            p(request=request)
-            return True
+            await permission(request=request)
         except HTTPException:
-            pass
-    return False
+            return False
+    
+    return True
+
+
+async def any_permission(permissions: list, request: Request) -> bool:
+    for permission in permissions:
+        try:
+            await permission(request=request)
+        except HTTPException:
+            return False
+        else: 
+            return True
 
 
 class BasePermission(ABC):
