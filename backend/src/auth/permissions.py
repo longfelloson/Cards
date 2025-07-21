@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from dataclasses import dataclass
 from fastapi import HTTPException, Request
 
 from auth.rbac.exceptions import ResourceNotFound
@@ -35,3 +36,10 @@ class RolePermission(BasePermission):
         has_access = has_access_to_resource(request, request.user)
         return has_access
     
+
+@dataclass
+class OwnerPermission(BasePermission):
+    instance: object
+    
+    async def has_required_permissions(self, request: Request) -> bool:
+        return self.instance.user_id == request.user.id
