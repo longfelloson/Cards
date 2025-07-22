@@ -22,10 +22,10 @@ async def any_permission(permissions: list, request: Request) -> bool:
     for permission in permissions:
         try:
             await permission(request=request)
-        except HTTPException:
-            return False
-        else:
             return True
+        except HTTPException:
+            pass
+    return False
 
 
 class BasePermission(ABC):
@@ -74,6 +74,7 @@ class VisibilityPermission(BasePermission):
             return self.instance.visibility == self.required_visibility
 
         if not provided_visibility:
+            print(2)
             return True
-
+        print(1)
         return provided_visibility == self.required_visibility
