@@ -52,7 +52,7 @@ class OwnerPermission(BasePermission):
 class UserMatchPermission(BasePermission):
     async def has_required_permissions(self, request):
         user_id = request.query_params.get("user_id")
-        return user_id and user_id == request.user.id
+        return user_id and user_id == str(request.user.id)
 
 
 @dataclass
