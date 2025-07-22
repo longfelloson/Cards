@@ -74,7 +74,6 @@ class VisibilityPermission(BasePermission):
             return self.instance.visibility == self.required_visibility
 
         if not provided_visibility:
-            print(2)
             return True
-        print(1)
+        
         return provided_visibility == self.required_visibility
