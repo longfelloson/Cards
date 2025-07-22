@@ -27,7 +27,7 @@ class CardView(BaseModel):
     ease_factor: float
     repetition_interval: int
     last_reviewed_at: Optional[datetime]
-    visibility: Visibility
+    visibility: Visibility = Visibility.visible
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -52,7 +52,7 @@ class CardsFilter(BaseFilter):
     deck_id: Optional[UUID4] = None
     to_study: Optional[bool] = None
     user_id: Optional[UUID4] = None
-    visibility: Optional[Visibility] = None
+    visibility: Visibility = Visibility.visible
 
 
 class CardReview(BaseModel):
