@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from enums import Visibility
 from database import Base
 from sqlalchemy import UUID, Column, DateTime, ForeignKey, String
 
@@ -14,6 +15,7 @@ class Collection(Base):
     user_id = Column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    visibility = Column(String(16), nullable=False, default=Visibility.hidden)
 
 
 class CollectionDeck(Base):
