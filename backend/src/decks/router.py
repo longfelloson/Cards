@@ -3,7 +3,11 @@ from fastapi_cache.decorator import cache
 from pydantic import UUID4
 
 from auth.dependencies import CurrentUserDependency, PermissionsDependency
-from decks.permissions import DeckOwnerPermission
+from decks.permissions import (
+    DeckOwnerPermission,
+    DeckViewPermission,
+    DecksViewPermission,
+)
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from decks.schemas import DeckCreate, DecksFilter, DeckUpdate, DeckView
@@ -36,6 +40,7 @@ async def create_deck(
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(DeckViewPermission))],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.DECK)
 async def get_deck(deck_id: UUID4, uow: UOWDependency):
@@ -44,7 +49,12 @@ async def get_deck(deck_id: UUID4, uow: UOWDependency):
     return deck
 
 
-@v1_router.get("", status_code=status.HTTP_200_OK, response_model=list[DeckView])
+@v1_router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    response_model=list[DeckView],
+    dependencies=[Depends(PermissionsDependency(DecksViewPermission))],
+)
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.DECKS)
 async def get_decks(
     uow: UOWDependency,
