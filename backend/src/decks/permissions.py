@@ -30,3 +30,19 @@ class DeckViewPermission(BasePermission):
             request=request,
         )
         return has_permission
+
+
+class DecksViewPermission(BasePermission):
+    async def has_required_permissions(self, request: Request) -> bool:
+        """
+        Check if user requires its own decks or not hidden decks
+        """
+        has_permission = await any_permission(
+            permissions=[
+                UserMatchPermission(),
+                VisibilityPermission(),
+            ],
+            request=request,
+        )
+        return has_permission
+    
