@@ -1,6 +1,6 @@
 from fastapi import Request
 
-from auth.permissions import BasePermission
+from auth.permissions import BasePermission, OwnerPermission, UserMatchPermission, VisibilityPermission, any_permission
 
 from decks.service import decks_service
 
@@ -12,3 +12,21 @@ class DeckOwnerPermission(BasePermission):
         deck = await decks_service.get(deck_id=deck_id, uow=request.state.uow)
 
         return deck.user_id == request.user.id
+
+
+class DeckViewPermission(BasePermission):
+    async def has_required_permissions(self, request: Request):
+        """
+        Check if user is an admin or owns the deck
+        """
+        deck_id = request.path_params["deck_id"]
+        card = await decks_service.get(deck_id=deck_id, uow=request.state.uow)
+
+        has_permission = await any_permission(
+            permissions=[
+                OwnerPermission(instance=card),
+                VisibilityPermission(instance=card)
+            ],
+            request=request,
+        )
+        return has_permission
