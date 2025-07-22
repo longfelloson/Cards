@@ -3,6 +3,7 @@ from fastapi import Request
 from auth.permissions import (
     BasePermission,
     OwnerPermission,
+    UserMatchPermission,
     VisibilityPermission,
     any_permission,
 )
@@ -33,6 +34,21 @@ class CollectionViewPermission(BasePermission):
             permissions=[
                 OwnerPermission(instance=collection),
                 VisibilityPermission(instance=collection),
+            ],
+            request=request,
+        )
+        return has_permission
+
+
+class CollectionsViewPermission(BasePermission):
+    async def has_required_permissions(self, request: Request) -> bool:
+        """
+        Check if user requires its own collections or not hidden ones
+        """
+        has_permission = await any_permission(
+            permissions=[
+                UserMatchPermission(),
+                VisibilityPermission(),
             ],
             request=request,
         )

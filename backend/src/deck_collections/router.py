@@ -1,7 +1,8 @@
 from auth.dependencies import PermissionsDependency
 from deck_collections.permissions import (
     CollectionOwnerPermission,
-    CollectionViewPermission
+    CollectionViewPermission,
+    CollectionsViewPermission
 )
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
@@ -50,6 +51,7 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     "",
     response_model=list[CollectionView],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(PermissionsDependency(CollectionsViewPermission))]
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.COLLECTIONS)
 async def get_collections(uow: UOWDependency, filter: CollectionsFilter = Depends()):
