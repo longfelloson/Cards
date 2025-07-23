@@ -1,7 +1,7 @@
-from auth.schemas import AccessToken
-from auth.service import auth_service
-from dependencies import UOWDependency
 from fastapi import APIRouter, status
+
+from auth.schemas import AccessToken
+from auth.dependencies import AuthServiceDependency
 from users.schemas import UserCredentials
 
 router = APIRouter()
@@ -12,9 +12,6 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     response_model=AccessToken,
 )
-async def create_token(
-    uow: UOWDependency,
-    data: UserCredentials,
-):
-    access_token: AccessToken = await auth_service.login(credentials=data, uow=uow)
+async def create_token(data: UserCredentials, service: AuthServiceDependency):
+    access_token: AccessToken = await service.login(credentials=data)
     return access_token
