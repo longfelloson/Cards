@@ -1,7 +1,6 @@
 from typing import Optional
 
 from cache.keys import Key
-from cache.core import storage
 from deck_collections.exceptions import (
     CollectionAlreadyExistsException,
     CollectionNotFoundException,
@@ -19,9 +18,8 @@ from unit_of_work import UnitOfWork
 
 
 class CollectionsService(AbstractService):
-    def __init__(self, *, storage, cache_keys):
+    def __init__(self, *, storage):
         self.storage = storage
-        self.cache_keys = cache_keys
 
     async def create(
         self, *, data: CollectionCreate, user_id: UUID4, uow: UnitOfWork
@@ -101,8 +99,5 @@ class CollectionsService(AbstractService):
 
     async def clear_collection_related_cache(self, collection_id: UUID4) -> None:
         await self.storage.clear_cache_by_keys(
-            self.cache_keys.collection(collection_id), self.cache_keys.collections()
+            self.storage.keys.collection(collection_id), self.storage.keys.collections()
         )
-
-
-collections_service = CollectionsService(storage=storage, cache_keys=Key)

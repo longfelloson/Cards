@@ -1,4 +1,5 @@
 from auth.dependencies import PermissionsDependency
+from deck_collections.dependencies import CollectionsServiceDependency
 from deck_collections.permissions import (
     CollectionOwnerPermission,
     CollectionViewPermission,
@@ -12,8 +13,6 @@ from deck_collections.schemas import (
     CollectionUpdate,
     CollectionView,
 )
-from deck_collections.service import collections_service
-from dependencies import UOWDependency
 from fastapi import APIRouter, Depends, Request, status
 from fastapi_cache.decorator import cache
 from pydantic import UUID4
@@ -25,12 +24,10 @@ v1_router = APIRouter()
 async def create_collection(
     request: Request,
     data: CollectionCreate,
-    uow: UOWDependency,
+    service: CollectionsServiceDependency,
 ):
     """Create a collection with provided data"""
-    collection = await collections_service.create(
-        data=data, user_id=request.user.id, uow=uow
-    )
+    collection = await service.create(data=data, user_id=request.user.id)
     return collection
 
 
@@ -41,9 +38,9 @@ async def create_collection(
     dependencies=[Depends(PermissionsDependency(CollectionViewPermission))],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.COLLECTION)
-async def get_collection(collection_id: UUID4, uow: UOWDependency):
+async def get_collection(collection_id: UUID4, service: CollectionsServiceDependency):
     """Get a collection by its id"""
-    collection = await collections_service.get(collection_id=collection_id, uow=uow)
+    collection = await service.get(collection_id=collection_id)
     return collection
 
 
@@ -54,9 +51,9 @@ async def get_collection(collection_id: UUID4, uow: UOWDependency):
     dependencies=[Depends(PermissionsDependency(CollectionsViewPermission))]
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.COLLECTIONS)
-async def get_collections(uow: UOWDependency, filter: CollectionsFilter = Depends()):
+async def get_collections(service: CollectionsServiceDependency, filter: CollectionsFilter = Depends()):
     """Get collections by provided conditions"""
-    collections = await collections_service.get_all(filter=filter, uow=uow)
+    collections = await service.get_all(filter=filter)
     return collections
 
 
@@ -67,12 +64,10 @@ async def get_collections(uow: UOWDependency, filter: CollectionsFilter = Depend
     dependencies=[Depends(PermissionsDependency(CollectionOwnerPermission))],
 )
 async def update_collection(
-    collection_id: UUID4, data: CollectionUpdate, uow: UOWDependency
+    collection_id: UUID4, data: CollectionUpdate, service: CollectionsServiceDependency,
 ):
     """Update a collection by provided data"""
-    collection = await collections_service.update(
-        collection_id=collection_id, data=data, uow=uow
-    )
+    collection = await service.update(collection_id=collection_id, data=data)
     return collection
 
 
@@ -82,6 +77,6 @@ async def update_collection(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(PermissionsDependency(CollectionOwnerPermission))],
 )
-async def delete_collection(collection_id: UUID4, uow: UOWDependency):
+async def delete_collection(collection_id: UUID4, service: CollectionsServiceDependency):
     """Delete a collection by its id"""
-    await collections_service.delete(collection_id=collection_id, uow=uow)
+    await service.delete(collection_id=collection_id)
