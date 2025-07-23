@@ -1,13 +1,13 @@
-from auth.dependencies import CurrentUserDependency, PermissionsDependency
-from users.permissions import UserOwnerPermission
-from cache.namespaces import Namespace
-from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
-from dependencies import UOWDependency
 from fastapi import APIRouter, Depends, status
 from fastapi_cache.decorator import cache
 from pydantic import UUID4
+
+from auth.dependencies import CurrentUserDependency, PermissionsDependency
+from users.dependencies import UsersServiceDependency
+from users.permissions import UserOwnerPermission
+from cache.namespaces import Namespace
+from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from users.schemas import UserCreate, UsersFilter, UserUpdate, UserView
-from users.service import users_service
 
 v1_router = APIRouter()
 
@@ -17,9 +17,9 @@ v1_router = APIRouter()
     response_model=UserView,
     status_code=status.HTTP_200_OK,
 )
-async def create_user(data: UserCreate, uow: UOWDependency):
+async def create_user(data: UserCreate, service: UsersServiceDependency):
     """Create a user with provided data"""
-    user = await users_service.create(data=data, uow=uow)
+    user = await service.create(data=data)
     return user
 
 
@@ -39,9 +39,9 @@ async def get_me(user: CurrentUserDependency):
     status_code=status.HTTP_200_OK,
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.USERS)
-async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
+async def get_users(service: UsersServiceDependency, filter: UsersFilter = Depends()):
     """Get users by provided conditions"""
-    users = await users_service.get_all(filter=filter, uow=uow)
+    users = await service.get_all(filter=filter)
     return users
 
 
@@ -52,9 +52,9 @@ async def get_users(uow: UOWDependency, filter: UsersFilter = Depends()):
     dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.USER)
-async def get_user(user_id: UUID4, uow: UOWDependency):
+async def get_user(user_id: UUID4, service: UsersServiceDependency):
     """Get a user by its id"""
-    user = await users_service.get(user_id=user_id, uow=uow)
+    user = await service.get(user_id=user_id)
     return user
 
 
@@ -67,10 +67,10 @@ async def get_user(user_id: UUID4, uow: UOWDependency):
 async def update_user(
     user_id: UUID4,
     data: UserUpdate,
-    uow: UOWDependency,
+    service: UsersServiceDependency,
 ):
     """Update a user with provided data"""
-    user = await users_service.update(user_id=user_id, data=data, uow=uow)
+    user = await service.update(user_id=user_id, data=data)
     return user
 
 
@@ -80,6 +80,6 @@ async def update_user(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
-async def delete_user(user_id: UUID4, uow: UOWDependency):
+async def delete_user(user_id: UUID4, service: UsersServiceDependency):
     """Delete a user by its id"""
-    await users_service.delete(user_id=user_id, uow=uow)
+    await service.delete(user_id=user_id)
