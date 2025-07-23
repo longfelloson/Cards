@@ -11,7 +11,7 @@ from cards.permissions import (
 from cache.namespaces import Namespace
 from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
-from cards.service import cards_service
+from cards.dependencies import CardsServiceDependency
 from dependencies import UOWDependency
 
 v1_router = APIRouter()
@@ -25,10 +25,10 @@ v1_router = APIRouter()
 async def create_card(
     request: Request,
     data: CardCreate,
-    uow: UOWDependency,
+    service: CardsServiceDependency,
 ):
     """Create a card with provided data"""
-    card = await cards_service.create(data=data, user_id=request.user.id, uow=uow)
+    card = await service.create(data=data, user_id=request.user.id)
     return card
 
 
@@ -39,9 +39,11 @@ async def create_card(
     dependencies=[Depends(PermissionsDependency(CardsViewPermission))],
 )
 @cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.CARDS)
-async def get_cards(uow: UOWDependency, filter: CardsFilter = Depends()):
+async def get_cards(
+    uow: UOWDependency, service: CardsServiceDependency, filter: CardsFilter = Depends()
+):
     """Get cards with provided conditions"""
-    cards = await cards_service.get_all(filter=filter, uow=uow)
+    cards = await service.get_all(filter=filter, uow=uow)
     return cards
 
 
@@ -52,9 +54,9 @@ async def get_cards(uow: UOWDependency, filter: CardsFilter = Depends()):
     dependencies=[Depends(PermissionsDependency(CardViewPermission))],
 )
 @cache(expire=DAY_TTL, namespace=Namespace.CARD)
-async def get_card(card_id: UUID4, uow: UOWDependency):
+async def get_card(card_id: UUID4, service: CardsServiceDependency):
     """Get a card by its ID"""
-    card = await cards_service.get(card_id=card_id, uow=uow)
+    card = await service.get(card_id=card_id)
     return card
 
 
@@ -64,9 +66,11 @@ async def get_card(card_id: UUID4, uow: UOWDependency):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(CardOwnerPermission))],
 )
-async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
+async def update_card(
+    card_id: UUID4, data: CardUpdate, service: CardsServiceDependency
+):
     """Update a card with provided ID"""
-    card = await cards_service.update(card_id=card_id, data=data, uow=uow)
+    card = await service.update(card_id=card_id, data=data)
     return card
 
 
@@ -76,6 +80,6 @@ async def update_card(card_id: UUID4, data: CardUpdate, uow: UOWDependency):
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(PermissionsDependency(CardOwnerPermission))],
 )
-async def delete_card(card_id: UUID4, uow: UOWDependency):
+async def delete_card(card_id: UUID4, service: CardsServiceDependency):
     """Delete a card by its id"""
-    await cards_service.delete(card_id=card_id, uow=uow)
+    await service.delete(card_id=card_id)
