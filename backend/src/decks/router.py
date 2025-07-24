@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, Request, status
-from fastapi_cache.decorator import cache
+from cashews import cache
 from pydantic import UUID4
 
 from auth.dependencies import PermissionsDependency
+from decks.permissions import DeckOwnerPermission
+from cache.constants import DAY_TTL, ONE_HOUR_TTL
+from cache.keys import Key
 from decks.dependencies import DecksServiceDependency
 from decks.permissions import (
-    DeckOwnerPermission,
     DeckViewPermission,
     DecksViewPermission,
 )
-from cache.namespaces import Namespace
-from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
 from decks.schemas import DeckCreate, DecksFilter, DeckUpdate, DeckView
 
 v1_router = APIRouter()
@@ -35,7 +35,7 @@ async def create_deck(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(DeckViewPermission))],
 )
-@cache(expire=DAY_TTL, namespace=Namespace.DECK)
+@cache(ttl=DAY_TTL, key=Key.DECK)
 async def get_deck(deck_id: UUID4, service: DecksServiceDependency):
     """Get a deck by provided ID"""
     deck = await service.get(deck_id=deck_id)
@@ -48,7 +48,7 @@ async def get_deck(deck_id: UUID4, service: DecksServiceDependency):
     response_model=list[DeckView],
     dependencies=[Depends(PermissionsDependency(DecksViewPermission))],
 )
-@cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.DECKS)
+@cache(ttl=ONE_HOUR_TTL, key=Key.DECKS)
 async def get_decks(service: DecksServiceDependency, filter: DecksFilter = Depends()):
     """Get decks by given options"""
     decks = await service.get_all(filter=filter)
@@ -61,6 +61,7 @@ async def get_decks(service: DecksServiceDependency, filter: DecksFilter = Depen
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(DeckOwnerPermission))],
 )
+@cache.invalidate(Key.DECK)
 async def update_deck(
     deck_id: UUID4, data: DeckUpdate, service: DecksServiceDependency,
 ):
@@ -74,6 +75,7 @@ async def update_deck(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(PermissionsDependency(DeckOwnerPermission))],
 )
+@cache.invalidate(Key.DECK)
 async def delete_deck(deck_id: UUID4, service: DecksServiceDependency):
     """Delete a deck by its ID"""
     await service.delete(deck_id=deck_id)

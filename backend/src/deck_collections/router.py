@@ -1,21 +1,22 @@
+from fastapi import APIRouter, Depends, Request, status
+from cashews import cache
+from pydantic import UUID4
+
 from auth.dependencies import PermissionsDependency
+from cache.keys import Key
+from deck_collections.permissions import CollectionOwnerPermission
 from deck_collections.dependencies import CollectionsServiceDependency
 from deck_collections.permissions import (
-    CollectionOwnerPermission,
     CollectionViewPermission,
-    CollectionsViewPermission
+    CollectionsViewPermission,
 )
-from cache.namespaces import Namespace
-from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
+from cache.constants import DAY_TTL, ONE_HOUR_TTL
 from deck_collections.schemas import (
     CollectionCreate,
     CollectionsFilter,
     CollectionUpdate,
     CollectionView,
 )
-from fastapi import APIRouter, Depends, Request, status
-from fastapi_cache.decorator import cache
-from pydantic import UUID4
 
 v1_router = APIRouter()
 
@@ -37,7 +38,7 @@ async def create_collection(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(CollectionViewPermission))],
 )
-@cache(expire=DAY_TTL, namespace=Namespace.COLLECTION)
+@cache(ttl=DAY_TTL, key=Key.COLLECTION)
 async def get_collection(collection_id: UUID4, service: CollectionsServiceDependency):
     """Get a collection by its id"""
     collection = await service.get(collection_id=collection_id)
@@ -48,10 +49,12 @@ async def get_collection(collection_id: UUID4, service: CollectionsServiceDepend
     "",
     response_model=list[CollectionView],
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CollectionsViewPermission))]
+    dependencies=[Depends(PermissionsDependency(CollectionsViewPermission))],
 )
-@cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.COLLECTIONS)
-async def get_collections(service: CollectionsServiceDependency, filter: CollectionsFilter = Depends()):
+@cache(ttl=ONE_HOUR_TTL, key=Key.COLLECTIONS)
+async def get_collections(
+    service: CollectionsServiceDependency, filter: CollectionsFilter = Depends()
+):
     """Get collections by provided conditions"""
     collections = await service.get_all(filter=filter)
     return collections
@@ -63,8 +66,11 @@ async def get_collections(service: CollectionsServiceDependency, filter: Collect
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(CollectionOwnerPermission))],
 )
+@cache.invalidate(Key.COLLECTION)
 async def update_collection(
-    collection_id: UUID4, data: CollectionUpdate, service: CollectionsServiceDependency,
+    collection_id: UUID4,
+    data: CollectionUpdate,
+    service: CollectionsServiceDependency,
 ):
     """Update a collection by provided data"""
     collection = await service.update(collection_id=collection_id, data=data)
@@ -77,6 +83,9 @@ async def update_collection(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(PermissionsDependency(CollectionOwnerPermission))],
 )
-async def delete_collection(collection_id: UUID4, service: CollectionsServiceDependency):
+@cache.invalidate(Key.COLLECTION)
+async def delete_collection(
+    collection_id: UUID4, service: CollectionsServiceDependency
+):
     """Delete a collection by its id"""
     await service.delete(collection_id=collection_id)

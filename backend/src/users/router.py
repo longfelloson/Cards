@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, status
-from fastapi_cache.decorator import cache
+from cashews import cache
 from pydantic import UUID4
 
 from auth.dependencies import CurrentUserDependency, PermissionsDependency
+from cache.keys import Key
 from users.dependencies import UsersServiceDependency
 from users.permissions import UserOwnerPermission
-from cache.namespaces import Namespace
-from cache.constants import DAY_TTL, TWELVE_HOURS_TTL
+from cache.constants import DAY_TTL, ONE_HOUR_TTL
 from users.schemas import UserCreate, UsersFilter, UserUpdate, UserView
 
 v1_router = APIRouter()
@@ -38,7 +38,7 @@ async def get_me(user: CurrentUserDependency):
     response_model=list[UserView],
     status_code=status.HTTP_200_OK,
 )
-@cache(expire=TWELVE_HOURS_TTL, namespace=Namespace.USERS)
+@cache(ttl=ONE_HOUR_TTL, key=Key.USERS)
 async def get_users(service: UsersServiceDependency, filter: UsersFilter = Depends()):
     """Get users by provided conditions"""
     users = await service.get_all(filter=filter)
@@ -51,7 +51,7 @@ async def get_users(service: UsersServiceDependency, filter: UsersFilter = Depen
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
-@cache(expire=DAY_TTL, namespace=Namespace.USER)
+@cache(ttl=DAY_TTL, key=Key.USER)
 async def get_user(user_id: UUID4, service: UsersServiceDependency):
     """Get a user by its id"""
     user = await service.get(user_id=user_id)
@@ -64,6 +64,7 @@ async def get_user(user_id: UUID4, service: UsersServiceDependency):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
+@cache.invalidate(Key.USER)
 async def update_user(
     user_id: UUID4,
     data: UserUpdate,
@@ -80,6 +81,7 @@ async def update_user(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
+@cache.invalidate(Key.USER)
 async def delete_user(user_id: UUID4, service: UsersServiceDependency):
     """Delete a user by its id"""
     await service.delete(user_id=user_id)
