@@ -1,18 +1,11 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, status
 from cashews import cache
 from pydantic import UUID4
 
-from auth.dependencies import PermissionsDependency
 from cache.keys import Key
-from cards.permissions import (
-    CardOwnerPermission,
-    CardViewPermission,
-    CardsViewPermission,
-)
 from cache.constants import DAY_TTL, ONE_HOUR_TTL
 from cards.schemas import CardCreate, CardsFilter, CardUpdate, CardView
 from cards.dependencies import CardsServiceDependency
-from dependencies import UOWDependency
 
 v1_router = APIRouter()
 
@@ -22,13 +15,9 @@ v1_router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     response_model=CardView,
 )
-async def create_card(
-    request: Request,
-    data: CardCreate,
-    service: CardsServiceDependency,
-):
+async def create_card(data: CardCreate, service: CardsServiceDependency):
     """Create a card with provided data"""
-    card = await service.create(data=data, user_id=request.user.id)
+    card = await service.create(data=data)
     return card
 
 
@@ -36,14 +25,14 @@ async def create_card(
     path="",
     response_model=list[CardView],
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CardsViewPermission))],
 )
 @cache(ttl=ONE_HOUR_TTL, key=Key.CARDS)
 async def get_cards(
-    uow: UOWDependency, service: CardsServiceDependency, filter: CardsFilter = Depends()
+    service: CardsServiceDependency,
+    filter: CardsFilter = Depends(),
 ):
     """Get cards with provided conditions"""
-    cards = await service.get_all(filter=filter, uow=uow)
+    cards = await service.get_all(filter=filter)
     return cards
 
 
@@ -51,7 +40,6 @@ async def get_cards(
     path="/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CardViewPermission))],
 )
 @cache(ttl=DAY_TTL, key=Key.CARD)
 async def get_card(card_id: UUID4, service: CardsServiceDependency):
@@ -64,7 +52,6 @@ async def get_card(card_id: UUID4, service: CardsServiceDependency):
     "/{card_id}",
     response_model=CardView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CardOwnerPermission))],
 )
 @cache.invalidate(Key.CARD)
 async def update_card(
@@ -79,7 +66,6 @@ async def update_card(
     path="/{card_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(PermissionsDependency(CardOwnerPermission))],
 )
 @cache.invalidate(Key.CARD)
 async def delete_card(card_id: UUID4, service: CardsServiceDependency):

@@ -20,16 +20,6 @@ async def get_current_user(
     return user
 
 
-class PermissionsDependency:
-    def __init__(self, *permission_classes):
-        self.permission_classes = permission_classes
-        
-    async def __call__(self, request: Request):
-        for permission_class in self.permission_classes:
-            permission_instance = permission_class()
-            await permission_instance(request)
-
-
 def get_auth_service(users_service: UsersServiceDependency) -> AuthService:
     service = AuthService(users_service=users_service)
     return service
