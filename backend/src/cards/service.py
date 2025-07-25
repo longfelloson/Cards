@@ -1,7 +1,9 @@
 from typing import Optional
 
 from pydantic import UUID4
+from sqlalchemy.exc import SQLAlchemyError
 
+from logger import logger
 from cards.exceptions import CardAlreadyExistsException, CardNotFoundException
 from cards.models import Card
 from cards.review import get_card_review
@@ -21,36 +23,62 @@ class CardsService(AbstractService):
         user_id: UUID4,
     ) -> Card:
         """Create a card with provided data"""
-        async with self.uow:
-            card_filter = CardFilter(face=data.face, user_id=user_id)
-            card = await self.uow.cards.get_by(filter=card_filter)
-            if card:
-                raise CardAlreadyExistsException()
-            card = await self.uow.cards.create(data=data, user_id=user_id)
+        try:
+            async with self.uow:
+                card_filter = CardFilter(face=data.face, user_id=user_id)
+                card = await self.uow.cards.get_by(filter=card_filter)
 
-            await self.uow.commit()
-            await self.clear_card_related_cache(card.id)
+                if card:
+                    raise CardAlreadyExistsException()
 
+                card = await self.uow.cards.create(data=data, user_id=user_id)
+
+                await self.uow.commit()
+        except SQLAlchemyError as exc:
+            logger.error(
+                f"Failed to create card for user_id = {user_id} and data = {data}:",
+                exc_info=True,
+            )
+            raise exc
+        else:
             return card
 
     async def get(self, *, card_id: UUID4, raise_error: bool = True) -> Card:
         """Get a card by its id"""
-        async with self.uow:
-            card = await self.uow.cards.get(id=card_id)
-            if not card and raise_error:
-                raise CardNotFoundException()
+        try:
+            async with self.uow:
+                card = await self.uow.cards.get(id=card_id)
+                if not card and raise_error:
+                    raise CardNotFoundException()
+        except SQLAlchemyError as exc:
+            logger.error(
+                f"Failed to get a card with card_id = {card_id}:",
+                exc_info=True,
+            )
+            raise exc
+        else:
             return card
 
     async def get_by(self, *, filter: CardFilter) -> Optional[Card]:
         """Get a card by filter"""
-        async with self.uow:
-            card = await self.uow.cards.get_by(filter=filter)
+        try:
+            async with self.uow:
+                card = await self.uow.cards.get_by(filter=filter)
+        except SQLAlchemyError as exc:
+            logger.error(f"Failed to get a card with filter = {filter}:", exc_info=True)
+            raise exc
+        else:
             return card
 
     async def get_all(self, filter: CardsFilter) -> list[Card]:
         """Get cards by provided options"""
-        async with self.uow:
-            cards = await self.uow.cards.get_all(filter=filter)
+        try:
+            async with self.uow:
+                cards = await self.uow.cards.get_all(filter=filter)
+        except SQLAlchemyError as exc:
+            logger.error(f"Failed to get cards with filter = {filter}:", exc_info=True)
+            raise exc
+        else:
             return cards
 
     async def update(
@@ -60,29 +88,35 @@ class CardsService(AbstractService):
         data: CardUpdate,
     ) -> Card:
         """Update a card by its ID with the provided data"""
-        async with self.uow:
-            card = await self.get(card_id=card_id)
-            update_data = data.model_dump(exclude_none=True)
+        try:
+            async with self.uow:
+                card = await self.get(card_id=card_id)
+                update_data = data.model_dump(exclude_none=True)
 
-            if data.last_memorization_level:
-                card_review = get_card_review(data.last_memorization_level, card)
-                update_data.update(card_review.model_dump(exclude_none=True))
+                if data.last_memorization_level:
+                    card_review = get_card_review(data.last_memorization_level, card)
+                    update_data.update(card_review.model_dump(exclude_none=True))
 
-            updated_card = await self.uow.cards.update(obj=card, data=update_data)
+                updated_card = await self.uow.cards.update(obj=card, data=update_data)
 
-            await self.uow.commit()
-            await self.clear_card_related_cache(card_id)
-
+                await self.uow.commit()
+        except SQLAlchemyError as exc:
+            logger.error(
+                f"Failed to update a card with card_id = {card_id} and data = {data}:",
+                exc_info=True,
+            )
+            raise exc
+        else:
             return updated_card
 
     async def delete(self, *, card_id: UUID4) -> None:
         """Delete a card by its id"""
-        async with self.uow:
-            await self.uow.cards.delete(obj_id=card_id)
-            await self.uow.commit()
-            await self.clear_card_related_cache(card_id)
-
-    async def clear_card_related_cache(self, card_id: UUID4) -> None:
-        await self.storage.clear_cache_by_keys(
-            self.storage.keys.card(card_id), self.storage.keys.cards()
-        )
+        try:
+            async with self.uow:
+                await self.uow.cards.delete(obj_id=card_id)
+                await self.uow.commit()
+        except SQLAlchemyError as exc:
+            logger.error(
+                f"Failed to delete a card with card_id = {card_id}:", exc_info=True
+            )
+            raise exc
