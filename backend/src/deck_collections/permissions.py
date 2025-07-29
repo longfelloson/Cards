@@ -1,55 +1,54 @@
-from fastapi import Request
+from dataclasses import dataclass
+from typing import Optional
 
-from auth.permissions import (
+from pydantic import UUID4
+
+from auth.permissions.core import (
     BasePermission,
     OwnerPermission,
     UserMatchPermission,
     VisibilityPermission,
-    any_permission,
 )
-from deck_collections.service import collections_service
+from auth.permissions.utils import any_permission
+from deck_collections.models import Collection
+from enums import Visibility
 
 
-class CollectionOwnerPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        collection_id = request.path_params["collection_id"]
-        collection = await collections_service.get(
-            collection_id=collection_id, uow=request.state.uow
-        )
-
-        return collection.user_id == request.user.id
-
-
+@dataclass(kw_only=True)
 class CollectionViewPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        """
-        Check if user owns a collection or requires visible one
-        """
-        collection_id = request.path_params["collection_id"]
-        collection = await collections_service.get(
-            collection_id=collection_id, uow=request.state.uow
-        )
+    """
+    Check if user owns a collection or requires visible one
+    """
 
-        has_permission = await any_permission(
-            permissions=[
-                OwnerPermission(instance=collection),
-                VisibilityPermission(instance=collection),
-            ],
-            request=request,
+    collection: Collection
+
+    def has_required_permissions(self) -> bool:
+        has_permission = any_permission(
+            OwnerPermission(instance=self.collection, current_user=self.current_user),
+            VisibilityPermission(
+                current_user=self.current_user, instance=self.collection
+            ),
         )
         return has_permission
 
 
+@dataclass(kw_only=True)
 class CollectionsViewPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        """
-        Check if user requires its own collections or not hidden ones
-        """
-        has_permission = await any_permission(
-            permissions=[
-                UserMatchPermission(),
-                VisibilityPermission(),
-            ],
-            request=request,
+    """
+    Check if user requires its own collections or not hidden ones
+    """
+
+    provided_visibility: Visibility
+    provided_user_id: Optional[UUID4]
+
+    def has_required_permissions(self) -> bool:
+        has_permission = any_permission(
+            UserMatchPermission(
+                current_user=self.current_user, provided_user_id=self.provided_user_id
+            ),
+            VisibilityPermission(
+                current_user=self.current_user,
+                provided_visibility=self.provided_visibility,
+            ),
         )
         return has_permission
