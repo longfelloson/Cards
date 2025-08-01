@@ -3,19 +3,23 @@ from typing import List, Optional
 from sqlalchemy.exc import SQLAlchemyError
 from pydantic import UUID4
 
+from cache.core import Storage
 from logger import logger
 from decks.exceptions import DeckAlreadyExistsException, DeckNotFoundException
 from decks.models import Deck
 from decks.schemas import DeckCreate, DeckFilter, DecksFilter, DeckUpdate
 from service import AbstractService
+from unit_of_work import UnitOfWork
+from users.models import User
 
 
 class DeckService(AbstractService):
-    def __init__(self, *, storage, uow):
-        self.storage = storage
-        self.uow = uow
+    def __init__(self, *, storage, uow, user):
+        self.storage: Storage = storage
+        self.uow: UnitOfWork = uow
+        self.user: User = user
 
-    async def create(self, *, data: DeckCreate, user_id: UUID4) -> Deck:
+    async def create(self, *, data: DeckCreate) -> Deck:
         """Create a deck with provided data"""
         try:
             async with self.uow:
@@ -24,12 +28,12 @@ class DeckService(AbstractService):
                 if deck:
                     raise DeckAlreadyExistsException()
 
-                deck: Deck = await self.uow.decks.create(data=data, user_id=user_id)
+                deck: Deck = await self.uow.decks.create(data=data)
 
                 await self.uow.commit()
         except SQLAlchemyError as exc:
             logger.error(
-                f"Failed to create a deck with user_id = {user_id} and data = {data}",
+                f"Failed to create a deck with user_id = {self.user.id} and data = {data}",
                 exc_info=True,
             )
             raise exc

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, status
 from cashews import cache
 from pydantic import UUID4
 
@@ -21,11 +21,9 @@ v1_router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     response_model=DeckView,
 )
-async def create_deck(
-    request: Request, data: DeckCreate, service: DecksServiceDependency
-):
+async def create_deck(data: DeckCreate, service: DecksServiceDependency):
     """Create a deck with provided data"""
-    deck = await service.create(data=data, user_id=request.user.id)
+    deck = await service.create(data=data)
     return deck
 
 
@@ -63,7 +61,9 @@ async def get_decks(service: DecksServiceDependency, filter: DecksFilter = Depen
 )
 @cache.invalidate(Key.DECK)
 async def update_deck(
-    deck_id: UUID4, data: DeckUpdate, service: DecksServiceDependency,
+    deck_id: UUID4,
+    data: DeckUpdate,
+    service: DecksServiceDependency,
 ):
     """Update a deck with provided ID"""
     deck = await service.update(deck_id=deck_id, data=data)
