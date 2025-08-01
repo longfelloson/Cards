@@ -2,15 +2,9 @@ from fastapi import APIRouter, Depends, status
 from cashews import cache
 from pydantic import UUID4
 
-from auth.dependencies import PermissionsDependency
-from decks.permissions import DeckOwnerPermission
 from cache.constants import DAY_TTL, ONE_HOUR_TTL
 from cache.keys import Key
 from decks.dependencies import DecksServiceDependency
-from decks.permissions import (
-    DeckViewPermission,
-    DecksViewPermission,
-)
 from decks.schemas import DeckCreate, DecksFilter, DeckUpdate, DeckView
 
 v1_router = APIRouter()
@@ -31,7 +25,6 @@ async def create_deck(data: DeckCreate, service: DecksServiceDependency):
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(DeckViewPermission))],
 )
 @cache(ttl=DAY_TTL, key=Key.DECK)
 async def get_deck(deck_id: UUID4, service: DecksServiceDependency):
@@ -44,7 +37,6 @@ async def get_deck(deck_id: UUID4, service: DecksServiceDependency):
     "",
     status_code=status.HTTP_200_OK,
     response_model=list[DeckView],
-    dependencies=[Depends(PermissionsDependency(DecksViewPermission))],
 )
 @cache(ttl=ONE_HOUR_TTL, key=Key.DECKS)
 async def get_decks(service: DecksServiceDependency, filter: DecksFilter = Depends()):
@@ -57,7 +49,6 @@ async def get_decks(service: DecksServiceDependency, filter: DecksFilter = Depen
     "/{deck_id}",
     response_model=DeckView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(DeckOwnerPermission))],
 )
 @cache.invalidate(Key.DECK)
 async def update_deck(
@@ -73,7 +64,7 @@ async def update_deck(
 @v1_router.delete(
     "/{deck_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(PermissionsDependency(DeckOwnerPermission))],
+    response_model=None,
 )
 @cache.invalidate(Key.DECK)
 async def delete_deck(deck_id: UUID4, service: DecksServiceDependency):
