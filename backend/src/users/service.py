@@ -12,10 +12,11 @@ from logger import logger
 
 
 class UsersService(AbstractService):
-    def __init__(self, *, verification_service, storage, uow):
+    def __init__(self, *, verification_service, storage, uow, user: User):
         self.verification_service = verification_service
         self.storage = storage
         self.uow = uow
+        self.user = user
 
     async def create(self, *, data: UserCreate) -> User:
         """Creates a user with provided data"""
