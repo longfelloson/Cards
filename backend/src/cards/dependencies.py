@@ -2,13 +2,16 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from auth.dependencies import CurrentUserDependency
 from cache.dependencies import StorageDependency
 from dependencies import UOWDependency
 from cards.service import CardsService
 
 
-def get_cards_service(storage: StorageDependency, uow: UOWDependency) -> CardsService:
-    service = CardsService(storage=storage, uow=uow)
+async def get_cards_service(
+    storage: StorageDependency, uow: UOWDependency, user: CurrentUserDependency
+) -> CardsService:
+    service = CardsService(storage=storage, uow=uow, user=user)
     return service
 
 

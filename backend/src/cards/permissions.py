@@ -1,51 +1,49 @@
-from fastapi import Request
+from typing import Optional
 
-from auth.permissions import (
+from dataclasses import dataclass
+
+from pydantic import UUID4
+
+from auth.permissions.core import (
     BasePermission,
     OwnerPermission,
     UserMatchPermission,
     VisibilityPermission,
-    any_permission,
 )
-from cards.service import cards_service
+from auth.permissions.utils import any_permission
+from cards.models import Card
+from enums import Visibility
 
 
-class CardOwnerPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        card_id = request.path_params.get("card_id")
-        card = await cards_service.get(card_id=card_id, uow=request.state.uow)
-
-        return card.user_id == request.user.id
-
-
+@dataclass(kw_only=True)
 class CardViewPermission(BasePermission):
-    async def has_required_permissions(self, request: Request):
-        """
-        Check if user is an admin or owns the card
-        """
-        card_id = request.path_params["card_id"]
-        card = await cards_service.get(card_id=card_id, uow=request.state.uow)
+    """Check if user is an admin or owns the card"""
 
-        has_permission = await any_permission(
-            permissions=[
-                OwnerPermission(instance=card),
-                VisibilityPermission(instance=card)
-            ],
-            request=request,
+    card: Card
+
+    def has_required_permissions(self) -> bool:
+        has_permission = any_permission(
+            OwnerPermission(current_user=self.current_user, instance=self.card),
+            VisibilityPermission(current_user=self.current_user, instance=self.card),
         )
         return has_permission
 
 
+@dataclass(kw_only=True)
 class CardsViewPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        """
-        Check if user requires its own cards or not hidden cards
-        """
-        has_permission = await any_permission(
-            permissions=[
-                UserMatchPermission(),
-                VisibilityPermission(),
-            ],
-            request=request,
+    """Check if user requires its own cards or not hidden cards"""
+
+    provided_visibility: Visibility
+    provided_user_id: Optional[UUID4]
+
+    def has_required_permissions(self) -> bool:
+        has_permission = any_permission(
+            UserMatchPermission(
+                current_user=self.current_user, provided_user_id=self.provided_user_id
+            ),
+            VisibilityPermission(
+                current_user=self.current_user,
+                provided_visibility=self.provided_visibility,
+            ),
         )
         return has_permission

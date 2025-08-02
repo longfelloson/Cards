@@ -36,4 +36,4 @@ class CollectionFilter(BaseFilter):
 
 class CollectionsFilter(BaseFilter):
     user_id: Optional[UUID4] = None
-    visibility: Optional[Visibility] = None
+    visibility: Visibility = Visibility.visible

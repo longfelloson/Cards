@@ -2,12 +2,18 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from auth.dependencies import CurrentUserDependency
 from cache.dependencies import StorageDependency
 from deck_collections.service import CollectionsService
+from dependencies import UOWDependency
 
 
-def get_collections_service(storage: StorageDependency) -> CollectionsService:
-    service = CollectionsService(storage=storage)
+async def get_collections_service(
+    storage: StorageDependency,
+    uow: UOWDependency,
+    user: CurrentUserDependency,
+) -> CollectionsService:
+    service = CollectionsService(storage=storage, uow=uow, user=user)
     return service
 
 

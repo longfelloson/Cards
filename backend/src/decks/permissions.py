@@ -1,48 +1,53 @@
-from fastapi import Request
+from dataclasses import dataclass
+from typing import Optional
+from pydantic import UUID4
 
-from auth.permissions import BasePermission, OwnerPermission, UserMatchPermission, VisibilityPermission, any_permission
-
-from decks.service import decks_service
-
-
-class DeckOwnerPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        """Check if a user is the owner of a deck"""
-        deck_id = request.path_params["deck_id"]
-        deck = await decks_service.get(deck_id=deck_id, uow=request.state.uow)
-
-        return deck.user_id == request.user.id
+from auth.permissions.core import (
+    BasePermission,
+    OwnerPermission,
+    UserMatchPermission,
+    VisibilityPermission,
+)
+from auth.permissions.utils import any_permission
+from decks.models import Deck
+from enums import Visibility
 
 
+@dataclass(kw_only=True)
 class DeckViewPermission(BasePermission):
-    async def has_required_permissions(self, request: Request):
-        """
-        Check if user is an admin or owns the deck
-        """
-        deck_id = request.path_params["deck_id"]
-        card = await decks_service.get(deck_id=deck_id, uow=request.state.uow)
+    """
+    Check if user owns a deck or requires visible one
+    """
 
-        has_permission = await any_permission(
-            permissions=[
-                OwnerPermission(instance=card),
-                VisibilityPermission(instance=card)
-            ],
-            request=request,
+    deck: Deck
+
+    def has_required_permissions(self) -> bool:
+        has_permission = any_permission(
+            OwnerPermission(instance=self.deck, current_user=self.current_user),
+            VisibilityPermission(
+                current_user=self.current_user, instance=self.deck
+            ),
         )
         return has_permission
 
 
+@dataclass(kw_only=True)
 class DecksViewPermission(BasePermission):
-    async def has_required_permissions(self, request: Request) -> bool:
-        """
-        Check if user requires its own decks or not hidden decks
-        """
-        has_permission = await any_permission(
-            permissions=[
-                UserMatchPermission(),
-                VisibilityPermission(),
-            ],
-            request=request,
+    """
+    Check if user requests its own decks or not hidden ones
+    """
+
+    provided_visibility: Visibility
+    provided_user_id: Optional[UUID4]
+
+    def has_required_permissions(self) -> bool:
+        has_permission = any_permission(
+            UserMatchPermission(
+                current_user=self.current_user, provided_user_id=self.provided_user_id
+            ),
+            VisibilityPermission(
+                current_user=self.current_user,
+                provided_visibility=self.provided_visibility,
+            ),
         )
         return has_permission
-    

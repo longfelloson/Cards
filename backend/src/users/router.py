@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends, status
 from cashews import cache
 from pydantic import UUID4
 
-from auth.dependencies import CurrentUserDependency, PermissionsDependency
+from auth.dependencies import CurrentUserDependency
 from cache.keys import Key
 from users.dependencies import UsersServiceDependency
-from users.permissions import UserOwnerPermission
 from cache.constants import DAY_TTL, ONE_HOUR_TTL
 from users.schemas import UserCreate, UsersFilter, UserUpdate, UserView
 
@@ -49,7 +48,6 @@ async def get_users(service: UsersServiceDependency, filter: UsersFilter = Depen
     "/{user_id}",
     response_model=UserView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
 @cache(ttl=DAY_TTL, key=Key.USER)
 async def get_user(user_id: UUID4, service: UsersServiceDependency):
@@ -62,7 +60,6 @@ async def get_user(user_id: UUID4, service: UsersServiceDependency):
     "/{user_id}",
     response_model=UserView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
 @cache.invalidate(Key.USER)
 async def update_user(
@@ -79,7 +76,6 @@ async def update_user(
     "/{user_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(PermissionsDependency(UserOwnerPermission))],
 )
 @cache.invalidate(Key.USER)
 async def delete_user(user_id: UUID4, service: UsersServiceDependency):

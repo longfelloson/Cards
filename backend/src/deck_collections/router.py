@@ -1,15 +1,9 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, status
 from cashews import cache
 from pydantic import UUID4
 
-from auth.dependencies import PermissionsDependency
 from cache.keys import Key
-from deck_collections.permissions import CollectionOwnerPermission
 from deck_collections.dependencies import CollectionsServiceDependency
-from deck_collections.permissions import (
-    CollectionViewPermission,
-    CollectionsViewPermission,
-)
 from cache.constants import DAY_TTL, ONE_HOUR_TTL
 from deck_collections.schemas import (
     CollectionCreate,
@@ -23,12 +17,10 @@ v1_router = APIRouter()
 
 @v1_router.post("", response_model=CollectionView, status_code=status.HTTP_201_CREATED)
 async def create_collection(
-    request: Request,
-    data: CollectionCreate,
-    service: CollectionsServiceDependency,
+    data: CollectionCreate, service: CollectionsServiceDependency
 ):
     """Create a collection with provided data"""
-    collection = await service.create(data=data, user_id=request.user.id)
+    collection = await service.create(data=data)
     return collection
 
 
@@ -36,7 +28,6 @@ async def create_collection(
     "/{collection_id}",
     response_model=CollectionView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CollectionViewPermission))],
 )
 @cache(ttl=DAY_TTL, key=Key.COLLECTION)
 async def get_collection(collection_id: UUID4, service: CollectionsServiceDependency):
@@ -49,11 +40,11 @@ async def get_collection(collection_id: UUID4, service: CollectionsServiceDepend
     "",
     response_model=list[CollectionView],
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CollectionsViewPermission))],
 )
 @cache(ttl=ONE_HOUR_TTL, key=Key.COLLECTIONS)
 async def get_collections(
-    service: CollectionsServiceDependency, filter: CollectionsFilter = Depends()
+    service: CollectionsServiceDependency,
+    filter: CollectionsFilter = Depends(),
 ):
     """Get collections by provided conditions"""
     collections = await service.get_all(filter=filter)
@@ -64,7 +55,6 @@ async def get_collections(
     "/{collection_id}",
     response_model=CollectionView,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(PermissionsDependency(CollectionOwnerPermission))],
 )
 @cache.invalidate(Key.COLLECTION)
 async def update_collection(
@@ -81,7 +71,6 @@ async def update_collection(
     "/{collection_id}",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(PermissionsDependency(CollectionOwnerPermission))],
 )
 @cache.invalidate(Key.COLLECTION)
 async def delete_collection(
