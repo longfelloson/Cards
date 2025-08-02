@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-
 from dataclasses import dataclass
 from typing import Optional
 
@@ -71,3 +70,13 @@ class VisibilityPermission(BasePermission):
             return True
 
         return self.provided_visibility == self.required_visibility
+
+
+@dataclass(kw_only=True)
+class RolePermission(BasePermission):
+    """If a user role matches the required one"""
+    required_role: Role
+    
+    def has_required_permissions(self) -> bool:
+        return self.current_user.role == self.required_role
+    

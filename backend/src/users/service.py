@@ -4,19 +4,24 @@ from pydantic import UUID4
 from sqlalchemy.exc import SQLAlchemyError
 
 from auth.password import get_hashed_password
+from auth.permissions.core import UserMatchPermission
+from auth.verification.service import VerificationService
+from cache.core import Storage
 from service import AbstractService
+from unit_of_work import UnitOfWork
 from users.exceptions import UserAlreadyExistsException, UserNotFoundException
 from users.models import User
+from users.permissions import UsersViewPermissions
 from users.schemas import UserCreate, UserFilter, UsersFilter, UserUpdate
 from logger import logger
 
 
 class UsersService(AbstractService):
     def __init__(self, *, verification_service, storage, uow, user: User):
-        self.verification_service = verification_service
-        self.storage = storage
-        self.uow = uow
-        self.user = user
+        self.verification_service: VerificationService = verification_service
+        self.storage: Storage = storage
+        self.uow: UnitOfWork = uow
+        self.user: User = user
 
     async def create(self, *, data: UserCreate) -> User:
         """Creates a user with provided data"""
@@ -39,16 +44,21 @@ class UsersService(AbstractService):
     async def get(self, *, user_id: UUID4) -> User:
         """Get a user by its ID"""
         try:
+            permission = UserMatchPermission(
+                current_user=self.user, provided_user_id=user_id
+            )
+            permission.check_permissions()
+
             async with self.uow:
                 user = await self.uow.users.get(id=user_id)
-                if not user:
-                    raise UserNotFoundException()
         except SQLAlchemyError as exc:
             logger.error(
                 f"Failed to get a user with user_id = {user_id}:", exc_info=True
             )
             raise exc
         else:
+            if not user:
+                raise UserNotFoundException()
             return user
 
     async def get_by(self, *, filter: UserFilter) -> Optional[User]:
@@ -65,6 +75,9 @@ class UsersService(AbstractService):
     async def get_all(self, *, filter: UsersFilter) -> List[Optional[User]]:
         """Get users by provided conditions"""
         try:
+            permission = UsersViewPermissions(current_user=self.user)
+            permission.check_permissions()
+
             async with self.uow:
                 users = await self.uow.users.get_all(filter=filter)
         except SQLAlchemyError as exc:
@@ -83,8 +96,14 @@ class UsersService(AbstractService):
             same user
         """
         try:
+            permission = UserMatchPermission(
+                current_user=self.user, provided_user_id=user_id
+            )
+            permission.check_permissions()
+
             async with self.uow:
                 user = await self.get(user_id=user_id)
+
                 if data.verify:
                     await self.verification_service.verify(
                         user=user,
@@ -119,6 +138,11 @@ class UsersService(AbstractService):
     async def delete(self, *, user_id: UUID4) -> None:
         """Delete a user by its id"""
         try:
+            permission = UserMatchPermission(
+                current_user=self.user, provided_user_id=user_id
+            )
+            permission.check_permissions()
+
             async with self.uow:
                 await self.uow.users.delete(obj_id=user_id)
                 await self.uow.commit()
